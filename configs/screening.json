@@ -1,0 +1,8 @@
+{
+  "variants": [
+    {"harness": "command-code", "model": "deepseek/deepseek-v4.1-flash", "effort": "high"},
+    {"harness": "command-code", "model": "z-ai/glm-5.3-flash", "effort": "high"},
+    {"harness": "codex", "model": "gpt-6.1-sol", "effort": "high"},
+    {"harness": "codex", "model": "gpt-6-luna", "effort": "high"}
+  ]
+}

@@ -1,1 +1,1 @@
-"""Small, generated, objectively graded Command Code evaluations."""
+"""Small, generated, objectively graded model capability evaluations."""

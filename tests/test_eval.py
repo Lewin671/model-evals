@@ -9,7 +9,9 @@ from unittest.mock import patch
 from evalkit.grading import execute, grade
 from evalkit.run import command, environment, invoke, parse_result
 from evalkit.tasks import LEDGER_REF, PAGE_REF, merge, oracle, ref, suite
-from evalkit.report import render
+from evalkit.report import render, prepare, scorecard
+from evalkit.adapters import Variant, codex_command, parse_codex
+import xml.etree.ElementTree as ET
 
 
 class Contracts(unittest.TestCase):
@@ -138,9 +140,68 @@ print(json.dumps({'type':'result','subtype':'success','finalText':sys.stdin.read
             (p/"results.json").write_text(json.dumps([{"model":"a","task":"x","status":"graded","score":1,
                 "sessionId":"SECRET_SESSION","detail":"/Users/private","usage":{"inputTokens":100,"secret":"SECRET"}}]))
             md,data=render(p)
-            self.assertIn("incomplete run",md)
+            self.assertIn("incomplete (",md)
             self.assertNotIn("SECRET",json.dumps(data))
             self.assertNotIn("/Users",json.dumps(data))
+
+    def test_codex_effort_flags_and_disabled_tools(self):
+        variant=Variant("codex","gpt-6.1-sol","high")
+        argv=codex_command(variant)
+        self.assertIn('model_reasoning_effort="high"',argv)
+        self.assertIn("features.shell_tool=false",argv)
+        self.assertIn("--ignore-user-config",argv)
+        self.assertNotIn("--output-schema",argv)
+        self.assertNotEqual(variant.id,Variant("codex","gpt-6.1-sol","medium").id)
+        with self.assertRaises(ValueError): Variant("wrong","x","high")
+        with self.assertRaises(ValueError): Variant("codex","x","default")
+
+    def test_codex_protocol_and_usage_normalization(self):
+        events=[{"type":"item.completed","item":{"id":"a","type":"agent_message","text":"{}"}},
+                {"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":60,"output_tokens":12}}]
+        result,tools=parse_codex("\n".join(map(json.dumps,events)))
+        self.assertEqual(result["usage"],{"inputTokens":100,"cacheReadTokens":60,"outputTokens":12})
+        self.assertEqual(tools,0)
+        self.assertEqual(result["observed_models"],[])
+        events.insert(0,{"type":"item.started","item":{"id":"t","type":"command_execution"}})
+        events.insert(1,{"type":"item.completed","item":{"id":"t","type":"command_execution"}})
+        self.assertEqual(parse_codex("\n".join(map(json.dumps,events)))[1],1)
+        with self.assertRaises(ValueError): parse_codex(json.dumps({"type":"turn.failed"}))
+
+    def test_command_code_effort_observed(self):
+        raw="\n".join(map(json.dumps,[{"type":"event","event":{"type":"model_request_end","model":"m","effort":"high"}},
+                                    {"type":"result","subtype":"success","finalText":"{}"}]))
+        result,_=parse_result(raw)
+        self.assertEqual(result["observed_models"],["m"])
+        self.assertEqual(result["observed_efforts"],["high"])
+
+    def test_same_model_different_efforts_remain_separate_and_svg_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p=Path(directory)
+            variants=[Variant("codex","m",e).record() for e in ("medium","high")]
+            (p/"manifest.json").write_text(json.dumps({"seed":1,"models":["m"],"variants":variants,
+                "tasks":["config-merge"],"git_commit":"abc"}))
+            (p/"results.json").write_text(json.dumps([{"variant":v["id"],"model":"m","harness":"codex",
+                "effort":v["effort"],"task":"config-merge","status":"graded","score":float(i)} for i,v in enumerate(variants)]))
+            md,data=render(p)
+            self.assertEqual(len(data["aggregates"]),2)
+            self.assertEqual([r["score"] for r in data["aggregates"]],[0,1])
+            self.assertIn("medium",md)
+            ET.fromstring(scorecard(data))
+            with self.assertRaises(ValueError): prepare([p,p])
+
+    def test_mismatched_seeds_cannot_be_combined(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths=[]
+            for seed in (1,2):
+                p=Path(directory)/str(seed);p.mkdir();paths.append(p)
+                (p/"manifest.json").write_text(json.dumps({"seed":seed,"models":[],"tasks":[]}))
+                (p/"results.json").write_text("[]")
+            with self.assertRaisesRegex(ValueError,"seed"): prepare(paths)
+
+    def test_campaign_requires_explicit_call_budget(self):
+        proc=subprocess.run([os.sys.executable,"-m","evalkit.run","--campaign","configs/screening.json"],capture_output=True,text=True)
+        self.assertNotEqual(proc.returncode,0)
+        self.assertIn("call count exceeds",proc.stderr)
 
 
 if __name__=="__main__": unittest.main()

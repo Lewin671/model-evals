@@ -1,107 +1,151 @@
-# Command Code model eval
+<div align="center">
 
-用少量、原创、可复现的小任务，比较 **Command Code CLI + 指定模型** 的表现。
-首批模型：`deepseek/deepseek-v4.1-flash`、`z-ai/glm-5.3-flash`。
+# Model Evals
 
-这是一套低成本初筛工具。当前没有已完成的真实模型评测结果，不预设胜者。
+**Small evaluation sets. Executed answers. Inspectable evidence.**
 
-## 首版评测集
+[![Checks](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml/badge.svg)](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat)](#run-an-evaluation)
+[![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
+[![Suite](https://img.shields.io/badge/suite-micro--v1-0f766e?style=flat)](#the-evaluation-set)
 
-| 任务 | 主要观察 | 判分 |
-|---|---|---|
-| 分层配置合并 | 代码实现、递归、删除语义、类型变化 | 24 个隐藏输入，实际执行 |
-| 预留资金账本 | 状态推理、幂等、过期边界、拒绝操作 | 24 个隐藏事件序列，实际执行 |
-| 修复快照分页 | 修复错误设计、过滤顺序、游标和稳定排序 | 24 个隐藏输入，实际执行 |
-| 多租户安全审查 | 真漏洞识别、避免误报 | 漏洞 ID 集合精确匹配 |
-| 发布证据核对 | 字段级版本合并、不编造、忽略数据中的指令 | 结构化答案精确匹配 |
-| 发布任务选择 | 依赖、互斥、预算、最优解和并列规则 | 穷举 oracle 精确匹配 |
+[Results](#results) · [Evaluation set](#the-evaluation-set) · [Methodology](docs/methodology.md) · [Reproduce](#run-an-evaluation)
 
-三道代码题要求返回一个实现 `solve(arg)` 的 Python 源码字符串；另外三道返回指定 JSON。
-所有任务要求严格 JSON，格式遵守本身也是评测的一部分。
-代码题按通过用例比例计分，分析题按整题 0/1 计分；六题等权。
-完整结果才给总分，基础设施故障不算模型 0 分。
+</div>
 
-## 快速开始
+A compact, open evaluation of model capabilities on original software and reasoning tasks.
+Models run through **Command Code** or **Codex**; every result includes the exact model,
+**reasoning effort**, harness, per-task score, and reported token usage.
 
-需要 macOS、Python 3.10+、可用的 `sandbox-exec`，以及已登录的 Command Code CLI。
-无 Python 第三方依赖；已核对的 CLI 版本为 **1.82.3**。
-代码执行目前仅支持 macOS，其他系统直接停止，不降级为无沙箱执行。
+The goal is to make a small evaluation useful: inspect what a model produced, execute
+its code against hidden inputs, and keep the cost low enough to rerun deliberately.
+
+## Results
+
+<!-- RESULTS:START -->
+
+The first measured comparison is being prepared. No illustrative or estimated scores are shown.
+
+| Model | Reasoning effort | Source | Status |
+|:--|:--|:--|:--|
+| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | Not run |
+| `z-ai/glm-5.3-flash` | `high` | Command Code | Not run |
+| `gpt-6.1-sol` | `high` | Codex | Not run |
+| `gpt-6-luna` | `high` | Codex | Not run |
+
+<!-- RESULTS:END -->
+
+**Read the scores as a screening result.** Six tasks cannot establish a general model ranking.
+Identical effort labels do not guarantee identical reasoning budgets across model families.
+Different harnesses also affect prompts and execution behavior. [Evaluation limits →](docs/methodology.md#what-this-does-and-does-not-measure)
+
+## The evaluation set
+
+| Task | Capability | How it is checked |
+|:--|:--|:--|
+| **Config merge** | Recursive implementation, deletion semantics, type changes | Execute against 24 hidden inputs |
+| **Reservation ledger** | State transitions, idempotency, expiration boundaries | Execute against 24 hidden event sequences |
+| **Snapshot pagination** | Repair an incorrect design, stable cursors, filter ordering | Execute against 24 hidden inputs |
+| **Security triage** | Find concrete multi-tenant and injection defects without false positives | Exact vulnerable-ID set |
+| **Evidence reconciliation** | Merge field-level evidence, retain uncertainty, ignore embedded instructions | Exact structured answer |
+| **Release selection** | Optimize under dependencies, exclusions, a budget, and tie-breaking rules | Exhaustive-search oracle |
+
+Each model answers each task **once**. Code tasks receive partial credit by test pass rate;
+structured reasoning tasks receive 0 or 1. Every task contributes one sixth of the total.
+The 72 code inputs are local checks, not 72 extra model calls or independent benchmark questions.
+
+<details>
+<summary><strong>Why generated tasks?</strong></summary>
+
+The tasks were written for this repository rather than copied from public benchmark problem sets.
+A fresh seed changes event sequences, identifiers, data, and optimization instances. All variants
+in a comparison receive identical prompt bytes and hidden inputs. Generators and oracles are
+excluded from model context.
+
+This reduces exact-answer memorization; it does **not** prove absence of training contamination.
+Public templates can eventually become training data. Future evaluations need new independent
+templates, not just different seeds.
+
+</details>
+
+## Run an evaluation
+
+**Requirements:** macOS, Python 3.10+, `sandbox-exec`, and authentication for the CLI(s) used.
+There are no third-party Python dependencies. Code grading fails closed on unsupported platforms.
+
+```sh
+git clone https://github.com/Lewin671/model-evals.git
+cd model-evals
+python3 -m unittest discover -s tests -v
+
+# Plan only. Does not call any model.
+python3 -m evalkit.run --campaign configs/screening.json --max-calls 24
+
+# Four models × six tasks. This consumes CLI/account quota.
+python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 --execute
+```
+
+Start smaller, or compare a model at two different reasoning efforts:
+
+```sh
+# Two Command Code models × two tasks = four CLI invocations.
+python3 -m evalkit.run --tasks reservation-ledger security-triage --execute
+
+# Explicit Codex model and reasoning effort; same task subset if desired.
+python3 -m evalkit.run --harness codex --models gpt-6.1-sol --effort medium --execute
+```
+
+For a controlled effort sweep, define multiple variants of the same model in a campaign JSON.
+Every variant must specify `harness`, `model`, and `effort`; results at different efforts remain separate.
+Use the **same seed and suite fingerprint** to compare separate runs. Never select only the best attempt.
+
+## Publish the evidence
+
+Raw prompts, final answers, CLI event streams, and stderr stay in gitignored `.runs/`.
+The report exporter produces a Markdown comparison, JSON data, and a native SVG scorecard:
+
+```sh
+python3 -m evalkit.report .runs/RUN_ID \
+  --output results/RUN_ID --readme README.md --include-answers
+```
+
+Review the exported final responses before committing. Raw CLI transcripts, session IDs,
+credentials, home paths, and personal configuration never belong in the public repository.
+Compatible runs can be supplied together to the report command; mismatched seeds, suites,
+prompts, and duplicate attempts are rejected.
+
+## Budget and reproducibility
+
+- **Bounded:** one attempt per model/task, no harness-level automatic retries, explicit call ceiling,
+  and a 180-second timeout per invocation. Command Code is capped at one model turn; Codex has
+  no equivalent verified turn-cap flag, so tool use is disabled/rejected and timeout bounds the run.
+- **Effort is explicit:** Command Code gets a temporary project-local effort override; Codex gets
+  `model_reasoning_effort` on the command line. Personal defaults are not silently treated as comparable.
+- **Evidence first:** objective graders, prompt hashes, suite fingerprint, code commit, CLI versions,
+  final responses, and token counters. Infrastructure failures do not become model zeros.
+- **ZDR:** `CMD_ZDR` is removed only from evaluation child processes, leaving normal settings intact.
+  This disables strict ZDR enforcement for Command Code; it does not guarantee a non-ZDR route
+  or change Codex's data-retention policy.
+- **No invented cost:** timeouts and turn limits are not dollar caps. CLI-internal retries and
+  background work can consume quota; actual charges come from the account's usage records.
+
+See [methodology and execution boundaries](docs/methodology.md) for identity verification,
+sandbox behavior, token-accounting caveats, and known omissions.
+
+## Contributing
+
+Prefer a small, independently checkable task over a large collection of familiar questions.
+Freeze generators and graders before a paid run. A new task needs a clear contract, known
+edge cases, a reference answer, a wrong-answer check, and a documented scoring rule.
+Never change a rubric after seeing which model it helps.
 
 ```sh
 python3 -m unittest discover -s tests -v
-cmd status
-cmd --list-models
-
-# 默认只生成计划，不调用模型、不消耗额度。
-python3 -m evalkit.run
-
-# 真正运行：默认新 seed、两模型 × 六题 = 12 个独立会话。
-python3 -m evalkit.run --execute
-
-# 用相同 seed 复现，或仅运行指定题目；每次仍会收费。
-python3 -m evalkit.run --seed 12345 --tasks reservation-ledger security-triage --execute
-
-# 输出目录必须尚不存在；摘要不会复制原始会话和个人配置。
-python3 -m evalkit.report .runs/RUN_ID --output results/RUN_ID
+python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 --seed 20261015
 ```
 
-运行前将生成器、评分器和文档提交，保留 manifest 中的 commit。
-正式比较不要使用 README 示例 seed。两模型同轮使用完全相同的题面和测试数据。
+CI runs correctness checks and fake-CLI integration tests only. It never calls paid models.
 
-## 额度与 ZDR
+---
 
-- 默认 12 次 CLI 调用，每题每模型一次，`--max-turns 1`，单会话超时 180 秒。
-- 不自动重试、不补考、不自动换模型。CLI、路由、额度、模型身份或工具协议异常时停止。
-- 超出 `--max-calls` 在调用前拒绝。可以先用 `--tasks` 运行两道题；增加题目或轮次应明确增加预算。
-- 单会话轮数和超时限制不是美元硬上限；CLI 没有本项目已验证的输出 token/美元硬限额。
-  单次长推理仍可能产生较多 token，超时取消也可能已收费。
-- 记录 CLI 报告的输入、输出及缓存 token；未知收费不推算为美元，实际费用以账户账单为准。
-- 仅从评测子进程的环境中移除 `CMD_ZDR`，不修改终端、全局设置或其他会话。
-  这表示不强制 ZDR，并不保证上游一定选择非 ZDR 路由。
-
-ZDR 变量及其含义见 [官方 ZDR 文档](https://commandcode.ai/docs/resources/zdr)；
-事件流与用量字段见 [Headless 文档](https://commandcode.ai/docs/headless)。
-
-## 公平性与防泄题
-
-- 每轮默认使用随机 seed，改变数据、事件、标识和约束组合；双方共享同一个 seed。
-- 题目为本项目编写，没有从 HumanEval、LeetCode 等公开题库复制题面或答案。
-- 生成器和 oracle 不加入模型上下文。CLI 在仓库外临时目录运行，权限规则拒绝所有工具；
-  禁用 skills、taste learning 和会话持久化，限制为一次回答。
-- 代码回答在单独的 OS 沙箱中执行：拒绝网络、写文件、读取用户目录和 fork，限制 CPU 时间。
-  沙箱允许系统库读取和执行程序，限制不等同于虚拟机，不能用来接收任意恶意第三方代码。
-- 交替 A/B、B/A 顺序；记录题面 SHA-256 和 CLI 事件报告的实际模型 ID，身份不符则停止。
-- 不使用 LLM 裁判，不把一个模型的答案提供给另一个，不根据结果修改既定评分标准。
-- 没有强制 reasoning effort，比较的是各模型在当前 CLI/provider 默认配置下的产品表现。
-  正式运行前检查两模型没有个人 effort 覆盖，并记录 CLI 版本；不同默认推理预算属于限制条件。
-- CLI 仍会加载用户层设置，可能包含 MCP、hooks、mods 等。请用干净配置运行；
-  工具禁用不等于 CLI 自身配置隔离。勿将私人指令或敏感配置用于非 ZDR 评测。
-
-随机数据主要防止记忆精确答案；公开的任务模板未来仍可能进入训练数据。
-因此不能声称“绝无污染”。长期使用应新增独立模板，在看结果前冻结评分规则，
-并把旧轮次当作开发集；不能只换 seed 就称为全新能力评测。
-
-## 结果如何解释
-
-首轮六题只适合发现明显短板和决定是否值得追加测试。72 个代码输入不等于 72 道独立题，
-同一份代码产生的通过结果高度相关。不要用小样本给出显著性、全面排名或泛化到所有工作流。
-
-这套初筛测的是短任务代码生成、推理、证据和约束遵守。
-**未覆盖**多文件仓库导航、持续工具使用、长程自主开发、视觉、联网检索与长上下文极限。
-若首轮接近，再另行安排少量真实仓库修复；不要为拉开分数临时挑有利题目。
-CLI 缓存、路由、重试和推理实现会影响用量；本项目不做硬件速度或延迟结论。
-
-原始 prompt、回答、NDJSON 和 stderr 存在被 gitignore 的 `.runs/`，只在本机保留。
-`report` 命令按白名单导出摘要，不包含 session ID、原始事件、绝对路径或个人设置。
-发布前人工审阅摘要及模型回答；不要 `git add -f .runs`。
-
-## 开发
-
-```sh
-python3 -m unittest discover -s tests -v
-python3 -m evalkit.run --seed 20261015
-```
-
-测试覆盖 oracle 已知边界、参考解与错误解、输入变异、沙箱隔离、ZDR 子进程范围、
-CLI 协议、调用预算和假 CLI 集成，不消耗模型额度。
-GitHub Actions 只执行这些正确性检查，不调用付费模型。
+[MIT](LICENSE) · [Methodology](docs/methodology.md) · [Source tasks](evalkit/tasks.py)

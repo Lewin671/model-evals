@@ -1,4 +1,4 @@
-"""Bounded paired CLI runs. Private artifacts stay under .runs/ by default."""
+"""Bounded model evaluations through explicit CLI/model/effort variants."""
 import argparse
 import hashlib
 import json
@@ -13,6 +13,12 @@ from datetime import datetime, timezone
 
 from .grading import execute, grade
 from .tasks import suite
+from .adapters import Variant, codex_command, parse_codex
+
+
+def suite_fingerprint():
+    base=Path(__file__).parent
+    return hashlib.sha256(b"".join((base/name).read_bytes() for name in ("tasks.py","grading.py"))).hexdigest()
 
 MODELS = ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3-flash"]
 
@@ -44,17 +50,23 @@ def parse_result(raw):
     result["observed_models"]=sorted({f["event"]["model"] for f in frames if f.get("type")=="event"
         and isinstance(f.get("event"),dict) and f["event"].get("type") in ("model_request_start","model_request_end")
         and isinstance(f["event"].get("model"),str)})
+    result["observed_efforts"]=sorted({f["event"]["effort"] for f in frames if f.get("type")=="event"
+        and isinstance(f.get("event"),dict) and f["event"].get("type")=="model_request_end"
+        and isinstance(f["event"].get("effort"),str)})
+    result["identity_source"]="CLI request events"
     return result, len(tools)
 
 
-def invoke(model, task, turns, timeout):
+def invoke(model, task, turns, timeout, effort="high", harness="command-code"):
     # Outside the benchmark checkout: generators/oracles are not auto-context.
     with tempfile.TemporaryDirectory(prefix="cc-eval-") as scratch:
         config = Path(scratch)/".commandcode"
         config.mkdir()
         (config/"settings.json").write_text(json.dumps({
-            "tasteLearning":False, "permissions":{"deny":["*"]}}))
-        process = subprocess.Popen(command(model,turns), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            "tasteLearning":False, "reasoningEffort":{model:effort},"permissions":{"deny":["*"]}}))
+        variant=Variant(harness,model,effort)
+        argv=command(model,turns) if harness=="command-code" else codex_command(variant)
+        process = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True, cwd=scratch, env=environment(), start_new_session=True)
         try:
             out,err=process.communicate(task.prompt,timeout=timeout)
@@ -76,7 +88,10 @@ def invoke(model, task, turns, timeout):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, help="fresh random seed by default; reuse for paired reproduction")
-    parser.add_argument("--models", nargs="+", default=MODELS)
+    parser.add_argument("--models", nargs="+")
+    parser.add_argument("--harness",choices=["command-code","codex"],default="command-code")
+    parser.add_argument("--effort",default="high",help="explicit reasoning effort, default high")
+    parser.add_argument("--campaign",type=Path,help="JSON variants with harness, model, effort")
     parser.add_argument("--tasks", nargs="+", help="subset of task IDs")
     parser.add_argument("--max-turns",type=int,default=1)
     parser.add_argument("--timeout",type=int,default=180)
@@ -85,47 +100,69 @@ def main():
     parser.add_argument("--execute",action="store_true",help="actually spend credits; otherwise print plan")
     args=parser.parse_args()
     if min(args.max_turns,args.timeout,args.max_calls)<1: parser.error("limits must be positive")
-    if len(set(args.models))!=len(args.models): parser.error("duplicate model")
+    try:
+        if args.campaign:
+            if args.models or args.harness!="command-code" or args.effort!="high":
+                parser.error("--campaign cannot combine with model/harness/effort overrides")
+            variants=[Variant(**v) for v in json.loads(args.campaign.read_text())["variants"]]
+        else:
+            if args.harness=="codex" and not args.models: parser.error("Codex requires explicit --models")
+            variants=[Variant(args.harness,m,args.effort) for m in (args.models or MODELS)]
+        if not variants or len({v.id for v in variants})!=len(variants): parser.error("empty or duplicate variants")
+    except (ValueError,KeyError,TypeError) as e: parser.error(str(e))
     seed=args.seed if args.seed is not None else secrets.randbits(64)
     tasks=suite(seed)
     if args.tasks:
         if set(args.tasks)-{t.id for t in tasks}: parser.error("unknown task")
         tasks=[t for t in tasks if t.id in args.tasks]
-    # Alternate A/B then B/A; one fresh session per model/task. Same prompt bytes.
-    schedule=[(m,t) for i,t in enumerate(tasks) for m in (args.models if i%2==0 else args.models[::-1])]
+    # Rotate first position across tasks and reverse alternate rows.
+    schedule=[]
+    for i,t in enumerate(tasks):
+        offset=i%len(variants)
+        order=variants[offset:]+variants[:offset]
+        schedule.extend((v,t) for v in (order if i%2==0 else order[::-1]))
     if len(schedule)>args.max_calls: parser.error("call count exceeds --max-calls; no partial run")
-    plan={"seed":seed,"calls":len(schedule),"models":args.models,"tasks":[t.id for t in tasks],
+    plan={"seed":seed,"suite":"micro-v1","suite_fingerprint":suite_fingerprint(),
+          "calls":len(schedule),"variants":[v.record() for v in variants],
+          "models":[v.model for v in variants],"tasks":[t.id for t in tasks],
           "max_turns":args.max_turns,"timeout_seconds":args.timeout,"zdr_enforced":False,
-          "tools":"denied", "reasoning_effort":"CLI/provider defaults (not forced)"}
+          "tools":"no tool use permitted", "reasoning_effort":"explicit per variant"}
     print(json.dumps(plan,indent=2),flush=True)
     if not args.execute: return
-    if not shutil.which("cmd"): parser.error("cmd not found")
+    binaries={"cmd" if v.harness=="command-code" else "codex" for v in variants}
+    for binary in binaries:
+        if not shutil.which(binary): parser.error(binary+" not found")
     # Check grading substrate before the first paid call.
     if execute("def solve(x): return x",[1]) != [{"value":1,"mutated":False}]:
         raise RuntimeError("sandbox preflight failed")
     output=args.output or Path(".runs")/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output.mkdir(parents=True,exist_ok=False)
-    version=subprocess.run(["cmd","--version"],text=True,capture_output=True,check=True).stdout.strip()
-    plan.update({"cli_version":version,"created_utc":datetime.now(timezone.utc).isoformat(),
+    versions={b:subprocess.run([b,"--version"],text=True,capture_output=True,check=True).stdout.strip() for b in sorted(binaries)}
+    plan.update({"cli_versions":versions,"created_utc":datetime.now(timezone.utc).isoformat(),
                  "git_commit":subprocess.run(["git","rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()})
     (output/"manifest.json").write_text(json.dumps(plan,indent=2))
     rows=[]
-    for i,(model,task) in enumerate(schedule):
-        print(f"[{i+1}/{len(schedule)}] {model} / {task.id}",flush=True)
-        stem=f"{i+1:02}-{model.replace('/','_')}-{task.id}"
+    for i,(variant,task) in enumerate(schedule):
+        model=variant.model
+        print(f"[{i+1}/{len(schedule)}] {variant.id} / {task.id}",flush=True)
+        stem=f"{i+1:02}-{variant.harness}-{model.replace('/','_')}-{variant.effort}-{task.id}"
         (output/f"{stem}.prompt.txt").write_text(task.prompt)
-        rc,out,err=invoke(model,task,args.max_turns,args.timeout)
+        rc,out,err=invoke(model,task,args.max_turns,args.timeout,variant.effort,variant.harness)
         (output/f"{stem}.ndjson").write_text(out)
         (output/f"{stem}.stderr.txt").write_text(err)
-        row={"model":model,"task":task.id,"dimension":task.dimension,"exit_code":rc,
+        row={"model":model,"harness":variant.harness,"effort":variant.effort,"variant":variant.id,
+             "task":task.id,"dimension":task.dimension,"exit_code":rc,"artifact_stem":stem,
              "prompt_sha256":hashlib.sha256(task.prompt.encode()).hexdigest()}
         try:
-            result,tool_count=parse_result(out)
+            result,tool_count=parse_result(out) if variant.harness=="command-code" else parse_codex(out)
             row.update({"usage":result.get("usage"),"cli_subtype":result.get("subtype"),"tool_calls":tool_count,
-                        "observed_models":result["observed_models"]})
+                        "observed_models":result["observed_models"],"observed_efforts":result["observed_efforts"],
+                        "identity_source":result["identity_source"]})
             (output/f"{stem}.answer.txt").write_text(result.get("finalText", ""))
-            if result["observed_models"] != [model]:
+            if variant.harness=="command-code" and result["observed_models"] != [model]:
                 row.update({"status":"model_identity_unverified","score":None})
+            elif variant.harness=="command-code" and result["observed_efforts"] != [variant.effort]:
+                row.update({"status":"reasoning_effort_unverified","score":None})
             elif tool_count:
                 row.update({"status":"protocol_failure","score":None})
             elif rc==0 and result.get("subtype")=="success":
