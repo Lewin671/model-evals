@@ -19,7 +19,7 @@ def export(run,out):
     for row in rows:
         name=row['task']+'-'+row['model'].split('/')[-1]
         src=run/name;dest=out/name;dest.mkdir()
-        text=['# '+row['task']+' — '+row['model'],'','Command Code · **low reasoning effort**','']
+        text=['# '+row['task']+' — '+row['model'],'','Command Code · **'+manifest['effort']+' reasoning effort**','']
         for step in row['steps']:
             i=step['request'];prompt=(src/f'step-{i}.prompt.txt').read_text()
             text += ['## Request '+str(i),'','```text',prompt,'```','','## Response '+str(i),'','```text',step.get('answer',''),'```','']
@@ -36,7 +36,7 @@ def export(run,out):
             if (src/file).exists():shutil.copyfile(src/file,dest/file)
         evidence.append((row,name))
     lines=['# Paired short diagnostic v1','',
-        'Two models, **low reasoning effort**, Command Code CLI. Model and effort are observed in request events.',
+        'Two models, **'+manifest['effort']+' reasoning effort**, Command Code CLI. Model and effort are observed in request events.',
         'Eight independently presented cases across four domains; browser/desktop use two-step text-state simulators.',
         'This is a diagnostic screen, not an overall capability leaderboard.','',
         '| Model | Coding A / B | Everyday A / B | Browser simulation A / B | Desktop simulation A / B | Tasks complete | Pairs complete |',
@@ -59,7 +59,7 @@ def export(run,out):
     ceiling=complete and all(r['grade']['complete'] for r in rows)
     lines +=['','## What this established','',
         'Ceiling: both models complete every task. This screen does **not** establish useful model separation. No Codex expansion is justified on these tasks.' if ceiling else
-        'The four-domain screen is incomplete: one DeepSeek/browser case produced a denied native shell call instead of a simulator action. It is excluded, not scored zero. Only never-attempted episodes were continued, without retry or task/checker changes. Compare common graded cases descriptively; no full balanced aggregate is justified.' if not complete else
+        'The four-domain screen is incomplete. Missing or invalid responses are excluded, not scored zero. Any explicit continuation skips recorded episodes, including failures. Compare common graded cases descriptively; no full balanced aggregate is justified.' if not complete else
         'The table shows observed task differences in this small run. Treat them as hypotheses for follow-up, not a general ranking or statistical significance.','',
         'The paired cases change delivery-ID scope, approval of a meeting update, a live checkout quote, and workbook approval status. A pair counts only if both variants complete. All four domains have equal task weight. Partial field/check scores remain debugging evidence.','',
         '## Actual usage','',

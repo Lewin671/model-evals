@@ -18,11 +18,12 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--execute',action='store_true')
+    p.add_argument('--effort',choices=['low','high'],default='low')
     p.add_argument('--resume-unattempted',action='store_true',help='explicit continuation; never retry any recorded episode')
     args=p.parse_args()
     tasks=suite();qualification=qualify()
     fingerprint=hashlib.sha256((Path(__file__).read_bytes()+Path(__file__).with_name('tasks.py').read_bytes())).hexdigest()
-    plan={'suite':'paired-short-v1','models':MODELS,'harness':'Command Code','effort':'low',
+    plan={'suite':'paired-short-v1','models':MODELS,'harness':'Command Code','effort':args.effort,
         'episodes':16,'max_model_requests':24,'output_token_soft_guard':16000,
         'per_request_timeout_seconds':120,'max_turns_per_request':1,'fingerprint':fingerprint,
         'qualification':qualification,'zdr_enforced':False,'created_utc':datetime.now(timezone.utc).isoformat(),
@@ -33,6 +34,7 @@ def main():
     previous=None
     if args.resume_unattempted:
         previous=json.loads((args.output/'manifest.json').read_text())
+        if previous.get('effort','low')!=args.effort:raise RuntimeError('effort changed; refusing continuation')
         frozen=subprocess.check_output(['git','show',previous['commit']+':evalkit/shortscreen/tasks.py'])
         if frozen!=Path(__file__).with_name('tasks.py').read_bytes():raise RuntimeError('task/checker changed; refusing continuation')
         (args.output/'results.before-continuation.json').write_text((args.output/'results.json').read_text())
@@ -60,13 +62,13 @@ def main():
             name=t['id']+'-'+model.split('/')[-1]
             folder=args.output/name;folder.mkdir()
             print(name,flush=True)
-            row={'task':t['id'],'domain':t['domain'],'case':t['variant'],'model':model,'effort':'low',
+            row={'task':t['id'],'domain':t['domain'],'case':t['variant'],'model':model,'effort':args.effort,
                 'harness':'Command Code','steps':[],'status':'running','grade':None}
             rows.append(row);checkpoint();prompt=t['prompt'];last=None
             for step in range(t['calls']):
                 stem=folder/f'step-{step+1}'
                 stem.with_suffix('.prompt.txt').write_text(prompt)
-                rc,raw,err=invoke(model,SimpleNamespace(prompt=prompt),1,120,'low')
+                rc,raw,err=invoke(model,SimpleNamespace(prompt=prompt),1,120,args.effort)
                 stem.with_suffix('.cli.ndjson').write_text(raw);stem.with_suffix('.stderr.txt').write_text(err)
                 counts=usage_from_events(frames(raw))
                 for k,v in counts.items():usage[k]+=v
@@ -76,7 +78,7 @@ def main():
                     result,tools=parse_result(raw)
                     info.update({'models_observed':result['observed_models'],'efforts_observed':result['observed_efforts'],
                         'tool_calls':tools,'subtype':result.get('subtype'),'answer':result.get('finalText','')})
-                    if rc!=0 or tools or result['observed_models']!=[model] or result['observed_efforts']!=['low'] or result.get('subtype')!='success':
+                    if rc!=0 or tools or result['observed_models']!=[model] or result['observed_efforts']!=[args.effort] or result.get('subtype')!='success':
                         raise RuntimeError('CLI/tool/identity/effort failure')
                     last=decode(result.get('finalText',''))
                 except (ValueError,RuntimeError) as exc:

@@ -41,3 +41,23 @@ class ShortScreen(unittest.TestCase):
                 run.main()
             invoke.assert_not_called()
             self.assertEqual(json.loads((root/'results.json').read_text()),rows)
+
+    def test_high_effort_is_passed_and_verified(self):
+        import contextlib,io,json,tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from evalkit.shortscreen import run
+        t=task('everyday','A')
+        def invoke(model,task,turns,timeout,effort):
+            self.assertEqual(effort,'high')
+            events=[{'type':'event','event':{'type':'model_request_start','model':model}},
+                {'type':'event','event':{'type':'model_request_end','model':model,'effort':effort,'usage':{'outputTokens':2}}},
+                {'type':'result','subtype':'success','finalText':json.dumps(t['expected'])}]
+            return 0,'\n'.join(map(json.dumps,events)),''
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)/'run'
+            with patch('sys.argv',['run','--output',str(root),'--effort','high','--execute']),patch.object(run,'qualify',return_value={}),patch.object(run,'suite',return_value=[t]),patch.object(run.subprocess,'check_output',return_value='test-version\n'),patch.object(run,'invoke',side_effect=invoke),contextlib.redirect_stdout(io.StringIO()):
+                run.main()
+            rows=json.loads((root/'results.json').read_text())
+            self.assertTrue(all(r['grade']['complete'] and r['effort']=='high' for r in rows))
+            self.assertEqual(json.loads((root/'manifest.json').read_text())['effort'],'high')

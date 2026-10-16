@@ -60,3 +60,14 @@ including that failure; it refuses task/checker changes against the original com
 There is no retry of the failed episode, substituted answer, or change to the grader.
 The same cumulative request/output limits apply. The full four-domain comparison remains
 incomplete even after the remaining independent samples finish.
+
+## High-effort comparison
+
+The follow-up repeats exactly the frozen eight tasks with both Flash models at **high**
+reasoning effort. Model IDs, task order, prompts, grader, per-request timeout (120 s),
+24-request limit, and 16,000 reported-output soft guard are unchanged. The CLI verifies
+the requested effort in each model-request-end event. Use `--effort high` and a new output
+folder; a continuation must retain that effort. No low-effort response is supplied to
+the high-effort models. Personal defaults and parent ZDR remain unchanged. Report
+per-model low/high transitions, usage and missing results. A single additional sample
+cannot isolate effort from sampling variation.
