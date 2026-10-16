@@ -24,8 +24,9 @@ selection. Response-format failures also exaggerated the apparent capability gap
 
 Those runs remain available as prototype records, but their score tables and charts have
 been removed from the main comparison. Repeating the same easy templates would not fix
-the ceiling effect. The workflow-based replacement is a design specification, not an
-implemented or calibrated suite.
+the ceiling effect. The first replacement is an implemented [incremental-importer coding
+workflow](docs/importer-calibration.md), with reference traces and local qualification
+gates. Its first small pilot is pending. The other three workflow families remain specifications.
 
 ## Prototype records
 
@@ -56,6 +57,11 @@ buttons to press is not.
 
 [Read the concrete fixtures, hidden-check plan, difficulty tiers and pilot gates →](docs/challenge-design.md)
 
+The coding runner now supports repository reads/edits, public test feedback and a
+mid-episode requirement change. Hidden checks execute the final files. It has no real
+shell/network tool and uses a controlled file-action protocol through Command Code.
+[Implementation, acceptance checks and bounded pilot →](docs/importer-calibration.md)
+
 The browser/desktop track can use local deterministic simulators; no real accounts or
 applications are needed. Action-dependent observations and final-state checks are required.
 Text-state evaluation remains distinct from visual perception and real tool execution.
@@ -82,6 +88,9 @@ Python packages are needed. These checks and dry-run plans do not call models:
 ```sh
 python3 -m unittest discover -s tests -v
 python3 -m evalkit.run --campaign configs/screening.json --max-calls 24
+
+# New workflow qualification gates; also makes no model calls.
+python3 -m evalkit.workflows.calibrate --seed 481
 ```
 
 The current runner is the archived general-v2 prototype. Paid reproduction now requires

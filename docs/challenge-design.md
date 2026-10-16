@@ -1,9 +1,9 @@
 # Challenge redesign: outcomes over one-step quizzes
 
-**Status: design specification, not an implemented or calibrated suite. No model calls
-were made for this redesign.** Existing adapters still run archived single-response prototypes.
-The stateful environments, reference traces and new graders below must be implemented
-and checked before a pilot. There is currently no validated model capability ranking.
+**Status:** the [coding importer workflow](importer-calibration.md) is now implemented with
+reference traces, independent checks and wrong-strategy qualification gates. Its first
+small pilot is pending. The everyday/browser/desktop families below remain specifications.
+There is currently no validated general model capability ranking.
 
 ## Why the prototypes were inadequate
 
