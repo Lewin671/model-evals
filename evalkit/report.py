@@ -234,6 +234,8 @@ def main():
     parser.add_argument("--include-answers",action="store_true",help="export final answers; manually review before git add")
     args=parser.parse_args()
     data,artifacts=prepare(args.runs)
+    if args.readme and data["runs"][0].get("suite") in ("micro-v1","general-v2"):
+        parser.error("Prototype results belong in the archive; they cannot repopulate the main README comparison.")
     answer_text=reviewed_answers(artifacts) if args.include_answers else None
     args.output.mkdir(parents=True,exist_ok=False)
     (args.output/"report.md").write_text(markdown(data))

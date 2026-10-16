@@ -2,164 +2,101 @@
 
 # Model Evals
 
-**Small evaluation sets. Executed answers. Inspectable evidence.**
+**Task-based evaluation experiments — difficulty calibration in progress.**
 
 [![Checks](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml/badge.svg)](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat)](#run-an-evaluation)
+[![Status](https://img.shields.io/badge/status-recalibrating-b7791f?style=flat)](docs/challenge-design.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
-[![Suite](https://img.shields.io/badge/suite-general--v2-0f766e?style=flat)](#the-evaluation-set)
 
-[Results](#results) · [Evaluation set](#the-evaluation-set) · [Methodology](docs/methodology.md) · [Reproduce](#run-an-evaluation)
+[Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
 
 </div>
 
-A compact evaluation of general coding, everyday tasks, browser workflow reasoning, and desktop workflow reasoning.
-Models run through **Command Code** or **Codex**; every result includes the exact model,
-**reasoning effort**, harness, per-task score, and reported token usage.
+Evaluate general **coding, everyday work, browser reasoning and desktop reasoning** using
+models available through Command Code and Codex. Model, reasoning effort, harness and
+usage must accompany every measured result.
 
-The goal is to make a small evaluation useful: inspect what a model produced, execute
-its code against hidden inputs, and keep the cost low enough to rerun deliberately.
+## Current status
 
-## Results
+**There is no validated capability ranking yet.** The initial tasks were too easy to
+separate the stronger configurations. The UI snapshots mostly tested obvious next-step
+selection. Response-format failures also exaggerated the apparent capability gap.
+
+Those runs remain available as prototype records, but their score tables and charts have
+been removed from the main comparison. Repeating the same easy templates would not fix
+the ceiling effect. The workflow-based replacement is a design specification, not an
+implemented or calibrated suite.
+
+## Prototype records
 
 <!-- RESULTS:START -->
 
-| Model | Reasoning effort | Source | Strict outcome | Format failures | Input / output tokens |
-|:--|:--|:--|--:|--:|--:|
-| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | **100.0%** | 0/6 | 83,774 / 6,942 |
-| `gpt-6.1-sol` | `high` | Codex | **100.0%** | 0/6 | 74,766 / 1,454 |
-| `gpt-6-luna` | `high` | Codex | **100.0%** | 0/6 | 70,620 / 2,641 |
-| `z-ai/glm-5.3-flash` | `high` | Command Code | **56.2%** | 2/6 | 103,138 / 4,149 |
+| Prototype | What it established | Records |
+|:--|:--|:--|
+| general-v2 | Pipeline checks worked; task difficulty did not establish useful model separation | [Findings](results/general-v2-screening-01/findings.md) · [Raw responses](results/general-v2-screening-01/responses.md) · [Full record](results/general-v2-screening-01/report.md) |
+| micro-v1 | Earlier, different-scope screen with a documented oracle correction | [Archived record](results/2026-10-15-micro-v1/report.md) |
 
-![Per-task scorecard](results/general-v2-screening-01/scorecard.svg)
-
-[Full results](results/general-v2-screening-01/report.md) · [Machine-readable data](results/general-v2-screening-01/summary.json) · [Model responses](results/general-v2-screening-01/responses.md)
-
-One attempt per task; screening results, not a general model ranking.
+These are development artifacts, not leaderboards. No additional model calls were made
+for the challenge redesign.
 
 <!-- RESULTS:END -->
 
-**Four equally weighted domains.** Coding, everyday tasks, browser snapshots and desktop snapshots
-contribute 25% each. Browser/desktop scores measure decisions from structured state, not actual
-browsing, visual perception or end-to-end computer operation.
+## Replacement task design
 
-**Latest findings:** DeepSeek, Sol and Luna fulfilled all tested bundles. GLM had two response-contract
-failures and omitted an approved credit. Its desktop answer's six actions were nevertheless correct
-inside an extra array wrapper. The UI choices therefore did not distinguish the models in this screen.
-[Read the failure analysis and separate content diagnostic →](results/general-v2-screening-01/findings.md)
+The next tasks should require information gathering, coupled changes, adaptation and a
+verified final artifact/state. Goals and constraints are provided; a sequence of obvious
+buttons to press is not.
 
-[Task construction and scoring →](docs/general-v2.md) · [Archived micro-v1 results](results/2026-10-15-micro-v1/report.md)
-
-## The evaluation set
-
-| Domain | Task bundle | What separates a useful answer from a plausible one |
+| Domain | Proposed workflow | What the checker must verify |
 |:--|:--|:--|
-| Coding | Config merge | Implements nested replacement/deletion precisely; passes 24 hidden inputs |
-| Coding | Pagination repair | Fixes filtering, stable ordering and cursor boundaries; passes 24 hidden inputs |
-| Everyday | Morning planner | Produces a feasible schedule and maximizes stated priorities; equivalent optima accepted |
-| Everyday | Expense reconciliation | Uses latest revisions, removes duplicates, subtracts credits and leaves unknown exchange rates unresolved |
-| Browser (simulated) | Six DOM checkpoints | Chooses by total cost and availability, applies pending filters, clears overlays, refreshes stale state and verifies completion |
-| Desktop (simulated) | Six structured screen checkpoints | Tracks focus, filenames and modal state; converts coordinate frames; waits for all files and reacquires resized geometry |
+| Coding | Add retryable incremental imports in a small existing repository | Parsing, persisted revisions, downstream totals and existing API behavior after interrupted replay |
+| Everyday | Revise a constrained appointment/travel plan after new information | Feasibility, source precedence, net cost and preservation of fixed commitments |
+| Browser reasoning | Compare offers across pages and detail views, then handle a changed quote | Current eligibility/total, saved comparison and evidence, after a real simulated state transition |
+| Desktop reasoning | Export normalized data from the correct workbook despite filters/dialogs | Actual output rows, totals, destination and preservation of the existing file |
 
-Each bundle costs **one model invocation**, so four models × six bundles = **24 CLI invocations**,
-including **12 through Command Code**. The local code tests and UI checkpoints add no model calls.
-Every configuration answers each bundle once, without feedback or a second attempt.
+[Read the concrete fixtures, hidden-check plan, difficulty tiers and pilot gates →](docs/challenge-design.md)
 
-UI checkpoints are independent: the model selects the next action from the state provided.
-Multiple valid dismissals and click points inside the correct control are accepted. Missing, stale,
-blocked, invented or premature actions fail their checkpoint. This is a low-cost diagnostic for
-state understanding and action selection; it does not test whether a model can execute the tools.
+The browser/desktop track can use local deterministic simulators; no real accounts or
+applications are needed. Action-dependent observations and final-state checks are required.
+Text-state evaluation remains distinct from visual perception and real tool execution.
 
-<details>
-<summary><strong>Why generated tasks?</strong></summary>
+## Calibration before another full campaign
 
-Fresh seeds vary inputs, invoice revisions, calendar constraints, product prices, node IDs,
-window origins and checkpoint order. Model variants share identical prompt bytes and local test data.
-No public benchmark questions were copied; the tasks were written for this project.
+First implement the environments/checkers, obtain reference traces, and show that simple
+baselines fail for the intended reason. Use counterfactual variants that change the required
+decision, rather than only randomizing IDs.
 
-Randomization reduces exact-answer memorization, but does not guarantee absence of training
-contamination or prevent learning public templates. Future suites need new task families, not just new seeds.
+Then pilot **one workflow family, two independent variants, two target Flash models** at
+an explicit matched effort: four episodes, before expanding to Codex and the full matrix.
+Episodes may contain multiple model requests. Set request/token and action limits from
+reference traces; count actual usage rather than calling four sessions "four calls."
 
-</details>
+Publish ceiling/floor effects and ties. Do not keep trying tasks until a preferred model
+wins. Keep semantic goal attainment separate from response-contract compliance.
 
-## Run an evaluation
+## Local checks
 
-**Requirements:** macOS, Python 3.10+, `sandbox-exec`, and authentication for the CLI(s) used.
-There are no third-party Python dependencies. Code grading fails closed on unsupported platforms.
+Python 3.10+ and macOS sandbox-exec are required for prototype code checks. No third-party
+Python packages are needed. These checks and dry-run plans do not call models:
 
 ```sh
-git clone https://github.com/Lewin671/model-evals.git
-cd model-evals
 python3 -m unittest discover -s tests -v
-
-# Plan only. Does not call any model.
 python3 -m evalkit.run --campaign configs/screening.json --max-calls 24
-
-# Four models × six tasks. This consumes CLI/account quota.
-python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 --execute
 ```
 
-Start smaller, or compare a model at two different reasoning efforts:
+The current runner is the archived general-v2 prototype. Paid reproduction now requires
+an explicit opt-in; it is not the replacement workflow runner:
 
 ```sh
-# Two Command Code models × two tasks = four CLI invocations.
-python3 -m evalkit.run --tasks config-merge browser-snapshots --execute
-
-# Explicit Codex model and reasoning effort; same task subset if desired.
-python3 -m evalkit.run --harness codex --models gpt-6.1-sol --effort medium --execute
+# Archival reproduction only. Consumes quota.
+python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 \
+  --execute --allow-prototype
 ```
 
-For a controlled effort sweep, define multiple variants of the same model in a campaign JSON.
-Every variant must specify `harness`, `model`, and `effort`; results at different efforts remain separate.
-Use the **same seed and suite fingerprint** to compare separate runs. Never select only the best attempt.
-
-## Publish the evidence
-
-Raw prompts, final answers, CLI event streams, and stderr stay in gitignored `.runs/`.
-The report exporter produces a Markdown comparison, JSON data, and a native SVG scorecard:
-
-```sh
-python3 -m evalkit.report .runs/RUN_ID \
-  --output results/RUN_ID --readme README.md --include-answers
-```
-
-Review the exported final responses before committing. Raw CLI transcripts, session IDs,
-credentials, home paths, and personal configuration never belong in the public repository.
-Compatible runs can be supplied together to the report command; mismatched seeds, suites,
-prompts, and duplicate attempts are rejected.
-
-## Budget and reproducibility
-
-- **Bounded:** one attempt per model/task, no harness-level automatic retries, explicit call ceiling,
-  and a 180-second timeout per invocation. Command Code is capped at one model turn; Codex has
-  no equivalent verified turn-cap flag, so tool use is disabled/rejected and timeout bounds the run.
-- **Effort is explicit:** Command Code gets a temporary project-local effort override; Codex gets
-  `model_reasoning_effort` on the command line. Personal defaults are not silently treated as comparable.
-- **Evidence first:** objective graders, prompt hashes, suite fingerprint, code commit, CLI versions,
-  final responses, and token counters. Infrastructure failures do not become model zeros.
-- **ZDR:** `CMD_ZDR` is removed only from evaluation child processes, leaving normal settings intact.
-  This disables strict ZDR enforcement for Command Code; it does not guarantee a non-ZDR route
-  or change Codex's data-retention policy.
-- **No invented cost:** timeouts and turn limits are not dollar caps. CLI-internal retries and
-  background work can consume quota; actual charges come from the account's usage records.
-
-See [methodology and execution boundaries](docs/methodology.md) for identity verification,
-sandbox behavior, token-accounting caveats, and known omissions.
-
-## Contributing
-
-Prefer a small, independently checkable task over a large collection of familiar questions.
-Freeze generators and graders before a paid run. A new task needs a clear contract, known
-edge cases, a reference answer, a wrong-answer check, and a documented scoring rule.
-Never change a rubric after seeing which model it helps.
-
-```sh
-python3 -m unittest discover -s tests -v
-python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 --seed 20261015
-```
-
-CI runs correctness checks and fake-CLI integration tests only. It never calls paid models.
+Reports can still be exported into an archive, but prototype runs cannot overwrite the
+main README comparison. Raw CLI logs, session IDs and personal settings remain private.
+Command Code reproduction unsets CMD_ZDR only in child processes, preserving normal settings.
 
 ---
 
-[MIT](LICENSE) · [Methodology](docs/methodology.md) · [Current task generator](evalkit/general.py)
+[MIT](LICENSE) · [Prototype methodology](docs/methodology.md) · [Challenge redesign](docs/challenge-design.md)

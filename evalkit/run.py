@@ -1,4 +1,4 @@
-"""Bounded model evaluations through explicit CLI/model/effort variants."""
+"""Archived prototype runner; paid reproduction requires explicit opt-in."""
 import argparse
 import hashlib
 import json
@@ -105,7 +105,10 @@ def main():
     parser.add_argument("--output",type=Path)
     parser.add_argument("--resume-run",type=Path,help="reuse every recorded response; invoke only never-attempted slots")
     parser.add_argument("--execute",action="store_true",help="actually spend credits; otherwise print plan")
+    parser.add_argument("--allow-prototype",action="store_true",help="explicitly reproduce the uncalibrated prototype; not a capability ranking")
     args=parser.parse_args()
+    if args.execute and not args.allow_prototype:
+        parser.error("general-v2 is an uncalibrated prototype with a ceiling effect. Paid runs require --allow-prototype for archival reproduction only.")
     if args.resume_run and args.output: parser.error("--resume-run cannot combine with --output")
     previous=json.loads((args.resume_run/"manifest.json").read_text()) if args.resume_run else None
     if min(args.max_turns,args.timeout,args.max_calls)<1: parser.error("limits must be positive")

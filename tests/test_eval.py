@@ -260,7 +260,7 @@ print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tok
             fake.chmod(0o700)
             env=dict(os.environ,PATH=str(p)+os.pathsep+os.environ['PATH'],FAKE_ROOT=str(p))
             base=[os.sys.executable,'-m','evalkit.run','--harness','codex','--models','fake-model',
-                  '--tasks','expense-reconciliation','browser-snapshots','--seed','1','--execute']
+                  '--tasks','expense-reconciliation','browser-snapshots','--seed','1','--execute','--allow-prototype']
             output=p/'run'
             first=subprocess.run(base+['--output',str(output)],capture_output=True,text=True,env=env)
             self.assertEqual(first.returncode,0,first.stderr)

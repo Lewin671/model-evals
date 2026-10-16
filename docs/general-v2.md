@@ -1,5 +1,9 @@
 # General-v2: constructing a useful small evaluation
 
+> Archived prototype infrastructure. Difficulty was not adequately calibrated; these
+> records do not establish a model capability ranking. See the [challenge redesign](challenge-design.md).
+
+
 The current scope is **general coding, everyday tasks, browser workflow reasoning and
 desktop workflow reasoning**. Security is excluded from new campaigns. Earlier micro-v1
 results remain an archive and must not be compared numerically with this suite.

@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import subprocess
+import sys
 
 from evalkit.tasks import Task,suite
 from evalkit.general import expense_answer,optimal_schedule
@@ -12,6 +14,24 @@ import xml.etree.ElementTree as ET
 
 
 class GeneralSuite(unittest.TestCase):
+    def test_uncalibrated_prototype_is_not_a_default_paid_run(self):
+        proc=subprocess.run([sys.executable,"-m","evalkit.run","--execute"],text=True,capture_output=True)
+        self.assertNotEqual(proc.returncode,0)
+        self.assertIn("uncalibrated prototype",proc.stderr)
+
+    def test_prototype_report_cannot_restore_a_main_readme_ranking(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p=Path(directory);run=p/"run";run.mkdir()
+            (run/"manifest.json").write_text(json.dumps({"seed":1,"suite":"general-v2","models":["m"],"tasks":["t"],"git_commit":"abc"}))
+            (run/"results.json").write_text(json.dumps([{"model":"m","task":"t","status":"graded","score":1}]))
+            readme=p/"README.md";readme.write_text("ORIGINAL")
+            out=p/"out"
+            proc=subprocess.run([sys.executable,"-m","evalkit.report",str(run),"--output",str(out),"--readme",str(readme)],text=True,capture_output=True)
+            self.assertNotEqual(proc.returncode,0)
+            self.assertIn("Prototype results belong in the archive",proc.stderr)
+            self.assertEqual(readme.read_text(),"ORIGINAL")
+            self.assertFalse(out.exists())
+
     def test_current_scope_has_no_security_and_four_domains(self):
         tasks=suite(5)
         self.assertEqual(len(tasks),6)

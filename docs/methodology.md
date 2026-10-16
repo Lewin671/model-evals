@@ -1,5 +1,9 @@
 # Methodology
 
+> Archived prototype infrastructure. Difficulty was not adequately calibrated; these
+> records do not establish a model capability ranking. See the [challenge redesign](challenge-design.md).
+
+
 ## Unit of comparison
 
 A configuration is **model ID × reasoning effort × harness**. It is not just a model name.
