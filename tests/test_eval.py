@@ -162,6 +162,8 @@ print(json.dumps({'type':'result','subtype':'success','finalText':sys.stdin.read
         self.assertEqual(result["usage"],{"inputTokens":100,"cacheReadTokens":60,"outputTokens":12})
         self.assertEqual(tools,0)
         self.assertEqual(result["observed_models"],[])
+        events.insert(0,{"type":"item.completed","item":{"id":"warning","type":"error","message":"startup warning"}})
+        self.assertEqual(parse_codex("\n".join(map(json.dumps,events)))[1],0)
         events.insert(0,{"type":"item.started","item":{"id":"t","type":"command_execution"}})
         events.insert(1,{"type":"item.completed","item":{"id":"t","type":"command_execution"}})
         self.assertEqual(parse_codex("\n".join(map(json.dumps,events)))[1],1)

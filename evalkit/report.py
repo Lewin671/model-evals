@@ -11,7 +11,7 @@ USAGE_FIELDS=("inputTokens","outputTokens","cacheReadTokens","cacheWriteTokens",
 ROW_FIELDS=("model","harness","effort","variant","task","dimension","status","score","passed","total",
             "exit_code","prompt_sha256","observed_models","observed_efforts","identity_source")
 MANIFEST_FIELDS=("seed","suite","suite_fingerprint","variants","models","tasks","cli_versions","cli_version",
-                 "git_commit","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools")
+                 "git_commit","adapter_commits","acquisition_notes","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools")
 START="<!-- RESULTS:START -->"
 END="<!-- RESULTS:END -->"
 
@@ -98,6 +98,11 @@ def markdown(data):
     for i,m in enumerate(data["runs"],1):
         versions=m.get("cli_versions",{"cmd":m.get("cli_version","unknown")})
         lines.append(f"| {i} | `{m['git_commit']}` | {escape(json.dumps(versions,sort_keys=True))} |")
+    for m in data["runs"]:
+        if m.get("adapter_commits"):
+            lines += ["", "Adapter revisions: " + ", ".join(f"`{c}`" for c in m["adapter_commits"]) + "."]
+        if m.get("acquisition_notes"):
+            lines += ["",m["acquisition_notes"]]
     lines += ["",f"Suite fingerprint: `{first.get('suite_fingerprint','not recorded')}`.",
               "", "Command Code model/effort identity is checked against request events. Codex JSONL does not expose those fields;",
               "Codex entries report the explicitly configured model/effort, not an independently verified upstream identity.",

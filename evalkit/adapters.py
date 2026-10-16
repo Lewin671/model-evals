@@ -34,7 +34,7 @@ def codex_command(variant):
           "-c",f'model_reasoning_effort="{variant.effort}"',
           "-c","project_doc_max_bytes=0","-c",'web_search="disabled"']
     for feature in ("shell_tool","apps","plugins","browser_use","computer_use","in_app_browser",
-                    "image_generation","view_image","skill_search","hooks","memory_tool"):
+                    "image_generation","view_image","skill_search","hooks","memories"):
         args += ["-c",f"features.{feature}=false"]
     args += ["-c","features.skip_host_skill_discovery=true","-"]
     return args
@@ -59,7 +59,7 @@ def parse_codex(raw):
               and isinstance(e["item"].get("text"),str)]
     if not messages: raise ValueError("missing final Codex message")
     tools={e["item"].get("id",str(i)) for i,e in enumerate(events) if e.get("type","").startswith("item.")
-           and isinstance(e.get("item"),dict) and e["item"].get("type") not in ("agent_message","reasoning")}
+           and isinstance(e.get("item"),dict) and e["item"].get("type") not in ("agent_message","reasoning","error")}
     raw_usage=completed[0].get("usage",{})
     mapping={"input_tokens":"inputTokens","output_tokens":"outputTokens",
              "cached_input_tokens":"cacheReadTokens","reasoning_output_tokens":"reasoningTokens"}

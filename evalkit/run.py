@@ -97,8 +97,11 @@ def main():
     parser.add_argument("--timeout",type=int,default=180)
     parser.add_argument("--max-calls",type=int,default=12)
     parser.add_argument("--output",type=Path)
+    parser.add_argument("--resume-run",type=Path,help="reuse every recorded response; invoke only never-attempted slots")
     parser.add_argument("--execute",action="store_true",help="actually spend credits; otherwise print plan")
     args=parser.parse_args()
+    if args.resume_run and args.output: parser.error("--resume-run cannot combine with --output")
+    previous=json.loads((args.resume_run/"manifest.json").read_text()) if args.resume_run else None
     if min(args.max_turns,args.timeout,args.max_calls)<1: parser.error("limits must be positive")
     try:
         if args.campaign:
@@ -110,7 +113,7 @@ def main():
             variants=[Variant(args.harness,m,args.effort) for m in (args.models or MODELS)]
         if not variants or len({v.id for v in variants})!=len(variants): parser.error("empty or duplicate variants")
     except (ValueError,KeyError,TypeError) as e: parser.error(str(e))
-    seed=args.seed if args.seed is not None else secrets.randbits(64)
+    seed=args.seed if args.seed is not None else previous["seed"] if previous else secrets.randbits(64)
     tasks=suite(seed)
     if args.tasks:
         if set(args.tasks)-{t.id for t in tasks}: parser.error("unknown task")
@@ -127,6 +130,9 @@ def main():
           "models":[v.model for v in variants],"tasks":[t.id for t in tasks],
           "max_turns":args.max_turns,"timeout_seconds":args.timeout,"zdr_enforced":False,
           "tools":"no tool use permitted", "reasoning_effort":"explicit per variant"}
+    if previous:
+        for key in ("seed","suite_fingerprint","variants","tasks","max_turns","timeout_seconds"):
+            if previous.get(key)!=plan.get(key): parser.error("resume plan differs in "+key)
     print(json.dumps(plan,indent=2),flush=True)
     if not args.execute: return
     binaries={"cmd" if v.harness=="command-code" else "codex" for v in variants}
@@ -135,21 +141,40 @@ def main():
     # Check grading substrate before the first paid call.
     if execute("def solve(x): return x",[1]) != [{"value":1,"mutated":False}]:
         raise RuntimeError("sandbox preflight failed")
-    output=args.output or Path(".runs")/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output.mkdir(parents=True,exist_ok=False)
+    output=args.resume_run or args.output or Path(".runs")/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if not previous: output.mkdir(parents=True,exist_ok=False)
     versions={b:subprocess.run([b,"--version"],text=True,capture_output=True,check=True).stdout.strip() for b in sorted(binaries)}
     plan.update({"cli_versions":versions,"created_utc":datetime.now(timezone.utc).isoformat(),
                  "git_commit":subprocess.run(["git","rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()})
+    if previous:
+        if previous["cli_versions"]!=versions: parser.error("CLI versions changed during campaign")
+        current_commit=plan["git_commit"]
+        plan=previous
+        plan["adapter_commits"]=list(dict.fromkeys(plan.get("adapter_commits",[plan["git_commit"]])+[current_commit]))
+        rows=json.loads((output/"results.json").read_text())
+        (output/f"results.before-resume-{datetime.now(timezone.utc).strftime('%H%M%S')}.json").write_text(json.dumps(rows,indent=2))
+    else: rows=[]
     (output/"manifest.json").write_text(json.dumps(plan,indent=2))
-    rows=[]
+    recorded=len(rows)
+    if recorded>len(schedule): parser.error("more recorded attempts than scheduled")
     for i,(variant,task) in enumerate(schedule):
         model=variant.model
         print(f"[{i+1}/{len(schedule)}] {variant.id} / {task.id}",flush=True)
         stem=f"{i+1:02}-{variant.harness}-{model.replace('/','_')}-{variant.effort}-{task.id}"
-        (output/f"{stem}.prompt.txt").write_text(task.prompt)
-        rc,out,err=invoke(model,task,args.max_turns,args.timeout,variant.effort,variant.harness)
-        (output/f"{stem}.ndjson").write_text(out)
-        (output/f"{stem}.stderr.txt").write_text(err)
+        if i<recorded:
+            prior=rows[i]
+            if (prior["variant"],prior["task"],prior["prompt_sha256"]) != (variant.id,task.id,hashlib.sha256(task.prompt.encode()).hexdigest()):
+                raise ValueError("recorded attempt differs from schedule; refusing another call")
+            rc=prior["exit_code"]
+            out=(output/f"{stem}.ndjson").read_text()
+            print("  Reusing recorded response; no model invocation.",flush=True)
+        else:
+            if (output/f"{stem}.ndjson").exists():
+                raise ValueError("unrecorded raw attempt exists; refusing a possible duplicate call")
+            (output/f"{stem}.prompt.txt").write_text(task.prompt)
+            rc,out,err=invoke(model,task,args.max_turns,args.timeout,variant.effort,variant.harness)
+            (output/f"{stem}.ndjson").write_text(out)
+            (output/f"{stem}.stderr.txt").write_text(err)
         row={"model":model,"harness":variant.harness,"effort":variant.effort,"variant":variant.id,
              "task":task.id,"dimension":task.dimension,"exit_code":rc,"artifact_stem":stem,
              "prompt_sha256":hashlib.sha256(task.prompt.encode()).hexdigest()}
@@ -171,7 +196,8 @@ def main():
                 row.update({"status":"infrastructure_or_cli_failure","score":None})
         except ValueError as e:
             row.update({"status":"invalid_cli_output","score":None,"detail":str(e)})
-        rows.append(row)
+        if i<recorded: rows[i]=row
+        else: rows.append(row)
         (output/"results.json").write_text(json.dumps(rows,indent=2))
         print(f"  {row['status']}: {row['score']}",flush=True)
         # Fail fast: no retries or silently substituted models.

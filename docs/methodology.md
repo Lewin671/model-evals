@@ -59,12 +59,18 @@ generators are public; "hidden" means excluded from the model's evaluation conte
   an independent process, ignored user config/rules, and a read-only execution sandbox.
 - Disables shell, browser, app, plugin, image, skill-search and hook features; suppresses
   discovered project instructions. The prompt requests one direct answer with no tools.
-- Any non-message/non-reasoning item in the JSONL stream is treated as forbidden tool use.
+- Any action item in the JSONL stream is treated as forbidden tool use. Startup diagnostic
+  `error` items are not tool calls; a successful completed turn is still required.
 - Uses no output JSON Schema enforcement, so both CLIs must follow the same plain-text protocol.
 - Codex JSONL reports completion, response text and token usage, but does not expose an
   independently verifiable model/effort identity. Reports mark these as configured values.
 - There is no verified native model-turn cap in this adapter. Timeout is enforced by the runner.
   CLI-internal retries remain possible in both products.
+
+If an adapter needs a correction during acquisition, `--resume-run` reuses every saved
+response and invokes only slots that have never been attempted. It refuses a changed suite,
+seed, variant list, CLI version or schedule. Adapter commits are recorded separately; graders
+and task templates remain frozen. No existing model response is regenerated.
 
 The built-in harness-instruction differences remain. No adapter is advertised as perfect isolation.
 
