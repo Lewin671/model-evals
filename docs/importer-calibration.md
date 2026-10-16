@@ -12,12 +12,15 @@ then revises the implementation. The final files execute against hidden scenario
 An explanation or a claimed test pass cannot substitute for working code.
 
 Command Code supplies the model through headless single-response invocations. Its native
-tools and skill discovery are disabled. The host implements bounded `read`, `write`,
+tool schemas are removed by a per-invocation mod, and skill discovery is disabled.
+The host verifies an empty active-tool list on every call. Permission-denial rules remain
+as a fallback. The host implements bounded `read`, `write`,
 `test` and `finish` actions through the response protocol. This tests model behavior
 with a **controlled coding tool protocol**, not the stock Command Code agent's entire
 tool environment. Source edits are real files, executed in an OS sandbox.
 
-Common JSON fences and singleton-array envelopes are accepted in advance. Other protocol
+Common JSON fences, a unique actions object surrounded by prose, singleton-array envelopes,
+bare action lists and single-action objects are accepted in advance. Other protocol
 errors receive feedback and consume a response, but do not directly zero a semantic score.
 The final artifact is tested even if the model forgets to say finish.
 
@@ -130,3 +133,17 @@ python3 -m evalkit.workflows.calibrate --execute
 
 Actual results and their limits must be added after the first frozen pilot. A passing
 preflight or an implemented runner is not an empirical capability comparison.
+
+## Adapter qualification incident
+
+The first real invocation was stopped before any repository action: native CLI `read_file`
+remained visible despite permission denial. The model selected that native tool, received
+no repository contents, and hit the one-turn cap. This was an adapter-only failure, not a
+semantic coding result. Its raw evidence and cost remain in the private setup-attempt folder.
+
+The adapter now uses [Command Code's active-tool filter](https://commandcode.ai/docs/mods)
+to remove native schemas, rather than merely denying execution, with an empty-tool proof
+checked for each invocation. The task, starter repositories and checker are unchanged.
+The effective pilot reuses the original seed. Its total request and output-token ceilings
+include the failed setup request through --setup-attempt; no scored or progressed episode
+can be excluded through that option. There is no automatic retry of a model coding result.

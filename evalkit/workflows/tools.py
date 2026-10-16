@@ -13,9 +13,23 @@ def decode(text):
     value=text.strip()
     if value.startswith("```") and value.endswith("```"):
         value=value.split("\n",1)[1].rsplit("```",1)[0].strip();normalizations.append("markdown fence")
-    answer=json.loads(value)
+    try:answer=json.loads(value)
+    except ValueError:
+        candidates=[]
+        for i,c in enumerate(value):
+            if c not in '{[':continue
+            try:parsed,end=json.JSONDecoder().raw_decode(value[i:])
+            except ValueError:continue
+            if isinstance(parsed,dict) and isinstance(parsed.get('actions'),list):candidates.append((i,i+end,parsed))
+        outer=[x for x in candidates if not any(y[0]<x[0] and x[1]<=y[1] for y in candidates)]
+        if len(outer)!=1:raise ValueError('No unambiguous JSON actions object')
+        answer=outer[0][2];normalizations.append('surrounding prose')
     if isinstance(answer,list) and len(answer)==1 and isinstance(answer[0],dict):
         answer=answer[0];normalizations.append("singleton array")
+    if isinstance(answer,list) and answer and all(isinstance(a,dict) and 'tool' in a for a in answer):
+        answer={'actions':answer};normalizations.append('bare action list')
+    if isinstance(answer,dict) and 'tool' in answer and 'actions' not in answer:
+        answer={'actions':[answer]};normalizations.append('single action object')
     if not isinstance(answer,dict) or not isinstance(answer.get("actions"),list):
         raise ValueError("Return an object containing actions list")
     if not 1<=len(answer["actions"])<=6:raise ValueError("Use between 1 and 6 actions per response")
