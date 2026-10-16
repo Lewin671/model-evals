@@ -62,7 +62,7 @@ def parse_result(raw):
     return result, len(tools)
 
 
-def invoke(model, task, turns, timeout, effort="high", harness="command-code",mod_path=None):
+def invoke(model, task, turns, timeout, effort="high", harness="command-code"):
     # Outside the benchmark checkout: generators/oracles are not auto-context.
     with tempfile.TemporaryDirectory(prefix="cc-eval-") as scratch:
         config = Path(scratch)/".commandcode"
@@ -71,14 +71,8 @@ def invoke(model, task, turns, timeout, effort="high", harness="command-code",mo
             "tasteLearning":False, "reasoningEffort":{model:effort},"permissions":{"deny":["*"]}}))
         variant=Variant(harness,model,effort)
         argv=command(model,turns) if harness=="command-code" else codex_command(variant)
-        env=environment()
-        proof=Path(scratch)/"tool-visibility.json"
-        if mod_path:
-            if harness!="command-code":raise ValueError("native tool filter supports Command Code only")
-            argv += ["--mod",str(Path(mod_path).resolve())]
-            env["MODEL_EVAL_TOOL_PROOF"]=str(proof)
         process = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, cwd=scratch, env=env, start_new_session=True)
+            stderr=subprocess.PIPE, text=True, cwd=scratch, env=environment(), start_new_session=True)
         try:
             out,err=process.communicate(task.prompt,timeout=timeout)
             exit_code=process.returncode
@@ -93,12 +87,6 @@ def invoke(model, task, turns, timeout, effort="high", harness="command-code",mo
             os.killpg(process.pid,signal.SIGKILL)
             process.communicate()
             raise
-        if mod_path:
-            try:verified=json.loads(proof.read_text())=={"active_tools":[]}
-            except (OSError,ValueError):verified=False
-            if not verified:
-                exit_code=125;err+="\nNative-tool visibility proof missing or nonempty.\n"
-            else:err+="\nMODEL_EVAL_NATIVE_TOOLS_VERIFIED_EMPTY\n"
     return exit_code,out,err
 
 

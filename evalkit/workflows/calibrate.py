@@ -94,8 +94,7 @@ def episode(directory,model,variant,seed,max_turns,timeout,usage,output_limit,ma
         message="You are repairing a repository through the controlled file tools described below.\n"+json.dumps(conversation,ensure_ascii=False)
         (directory/f"turn-{turn}.prompt.txt").write_text(message)
         usage["cliInvocations"]+=1
-        rc,out,err=invoke(model,SimpleNamespace(prompt=message),1,timeout,effort="high",harness="command-code",
-                          mod_path=Path(__file__).with_name('no_native_tools.mjs'))
+        rc,out,err=invoke(model,SimpleNamespace(prompt=message),1,timeout,effort="high",harness="command-code")
         (directory/f"turn-{turn}.ndjson").write_text(out);(directory/f"turn-{turn}.stderr.txt").write_text(err)
         event_frames=frames(out)
         usage["observedModelRequests"]+=sum(1 for f in event_frames if isinstance(f.get('event'),dict) and f['event'].get('type')=='model_request_start')
@@ -147,6 +146,7 @@ def main():
     parser.add_argument("--max-requests",type=int,default=24,help='total CLI request ceiling including an excluded setup attempt')
     parser.add_argument("--setup-attempt",type=Path,help='retain and account for a verified adapter-only failure')
     args=parser.parse_args()
+    if args.execute:parser.error('The controlled-response adapter is retired. Use evalkit.workflows.native_calibrate for the native-tool pilot.')
     if not 3<=args.max_turns<=6:parser.error("calibration allows 3–6 responses per episode")
     if args.timeout<1 or args.output_token_guard<1:parser.error("limits must be positive")
     if not 1<=args.max_requests<=24:parser.error('pilot total request ceiling must be 1–24')

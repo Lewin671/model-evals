@@ -1,4 +1,6 @@
 import json
+import os
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -13,6 +15,36 @@ from evalkit.workflows.tools import decode,perform
 
 
 class ImporterWorkflow(unittest.TestCase):
+    def test_native_tools_bridge_and_midpoint_change_without_model_calls(self):
+        node=shutil.which('node')
+        if not node:self.skipTest('Node required for the Command Code mod')
+        base=Path(__file__).resolve().parents[1]/'evalkit/workflows'
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)/'repo';root.mkdir();materialize(root,'stream')
+            env=dict(os.environ,MODEL_EVAL_WORKSPACE=str(root),MODEL_EVAL_PYTHON=sys.executable,
+                MODEL_EVAL_BRIDGE=str(base/'bridge.py'),MODEL_EVAL_SEED='481',MODEL_EVAL_VARIANT='stream',
+                MODEL_EVAL_CHANGE=json.dumps('ADDED REQUIREMENT'),MODEL_EVAL_CONTROL=str(Path(d)/'control.json'))
+            script='''import make from '''+json.dumps((base/'native_tools.mjs').as_uri())+''';
+const tools={};let hooks;let active=[];
+make({addTool:t=>{tools[t.schema.name]=t},setActiveTools:a=>{active=a},getActiveTools:()=>active,
+      hooks:h=>{hooks=h},on:()=>{}});
+const state={messages:[]};hooks.onTurnStart({state,turnNumber:1});
+if(active.length!==3 || hooks.appendSystemPrompt().includes('ADDED REQUIREMENT'))throw Error('wrong initial surface');
+const read=await tools.repo_read.run({input:{paths:['ledger/api.py']}});
+if(!read.ok)throw Error('read failed');
+const files=JSON.parse(process.env.TEST_REFERENCE_FILES);
+const [,before]=await Promise.all([tools.repo_write.run({input:{files}}),tools.repo_test.run({input:{}})]);
+const initialChecks=JSON.parse(before.content[0].text).public_checks;
+if(initialChecks.total!==3 || initialChecks.passed!==3)throw Error('write/test ordering failed');
+hooks.onTurnStart({state,turnNumber:3});
+if(!hooks.appendSystemPrompt().includes('ADDED REQUIREMENT'))throw Error('change missing');
+const after=await tools.repo_test.run({input:{}});
+const checks=JSON.parse(after.content[0].text).public_checks;
+if(checks.total!==4 || checks.passed!==4)throw Error('changed tests failed');
+'''
+            env['TEST_REFERENCE_FILES']=json.dumps({k:v for k,v in sources('stream',reference=True).items() if k in ('ledger/api.py','ledger/parser.py','ledger/store.py')})
+            result=subprocess.run([node,'--input-type=module','-e',script],capture_output=True,text=True,env=env)
+            self.assertEqual(result.returncode,0,result.stderr)
     def test_native_tool_filter_mod_removes_schemas_without_inference(self):
         node=shutil.which('node')
         if not node:self.skipTest('Node needed only for Command Code mod check')

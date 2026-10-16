@@ -4,6 +4,12 @@ This is the first implemented replacement workflow. It covers **coding only**. E
 browser and desktop workflows remain design specifications. No four-domain ranking can
 be inferred from this pilot.
 
+## Current transport
+
+The live pilot now uses the native repo_read, repo_write and repo_test tools described
+in [the native pilot protocol](native-importer-pilot.md). The controlled-response adapter
+below is retained as qualification/incident documentation, and its paid entry point is disabled.
+
 ## What the model actually does
 
 The model receives a repository contract and file tree, reads three Python modules,
@@ -128,7 +134,7 @@ only reviewed synthetic source edits, action/test traces and sanitized summary f
 python3 -m evalkit.workflows.calibrate --seed 481
 
 # Paid pilot: random seed, four episodes, bounded feedback loop.
-python3 -m evalkit.workflows.calibrate --execute
+python3 -m evalkit.workflows.native_calibrate --seed SEED --output .runs/native-pilot --execute
 ```
 
 Actual results and their limits must be added after the first frozen pilot. A passing
