@@ -1,150 +1,116 @@
-<div align="center">
-
 # Model Evals
 
-**Task-based evaluation experiments — difficulty calibration in progress.**
+**Compare models and reasoning effort on small, checkable tasks.**
+
+Inspect the prompts, answers, code, and failure cases behind each result. The current
+screen covers coding, everyday decisions, browser reasoning, and desktop reasoning.
 
 [![Checks](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml/badge.svg)](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml)
-[![Status](https://img.shields.io/badge/status-recalibrating-b7791f?style=flat)](docs/challenge-design.md)
-[![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
+[![MIT](https://img.shields.io/badge/license-MIT-64748b)](LICENSE)
 
-[Latest comparison](results/three-model-comparison-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
+[Results](#results) · [Tasks](#tasks) · [Run locally](#run-locally) · [Data for agents](#data-for-agents)
 
-</div>
+## Results
 
-Evaluate general **coding, everyday work, browser reasoning and desktop reasoning** using
-models available through Command Code and Codex. Model, reasoning effort, harness and
-usage must accompany every measured result.
+**3 models · 2 reasoning efforts · 4 task pairs · 8 cases per configuration.**
+One sample per case. All configurations use the same frozen tasks and checker.
 
-## Current status
+| Model | Reasoning effort | Tasks completed | Reported output tokens |
+|:--|:--|--:|--:|
+| [DeepSeek v4.1 Flash](results/paired-short-01/report.md) | low | 4/7; 1 excluded | 4,603 |
+| [DeepSeek v4.1 Flash](results/paired-short-high-01/report.md) | high | **8/8** | 10,892 |
+| [GLM 5.3 Flash](results/paired-short-01/report.md) | low | 7/8 | 1,447 |
+| [GLM 5.3 Flash](results/paired-short-high-01/report.md) | high | 6/8 | 2,302 |
+| [GPT-6 Luna](results/luna-low-01/report.md) | low | 5/8 | 630 |
+| [GPT-6 Luna](results/luna-high-01/report.md) | high | **8/8** | 1,643 |
 
-**Luna high and DeepSeek high both complete 8/8 tasks; GLM high completes 6/8.**
-This is one small paired diagnostic, not a validated general ranking. The same eight
-frozen cases are repeated at low and high reasoning effort; each case has one sample.
+DeepSeek and GLM run through **Command Code**, with model/effort observed in CLI request
+events. Luna runs through **Codex**, with explicit invocation settings; its JSONL does
+not independently expose model/effort. Token counts are CLI-reported, not verified charges.
 
-| Model | Harness | Low effort | High effort | Identity / effort evidence |
-|:--|:--|:--|:--|:--|
-| DeepSeek v4.1 Flash | Command Code | 4/7 graded; 1 excluded | **8/8** | CLI request events |
-| GLM 5.3 Flash | Command Code | **7/8** | 6/8 | CLI request events |
-| GPT-6 Luna | Codex | 5/8 | **8/8** | Explicit invocation; not independently exposed in JSONL |
+**What went wrong:**
 
-These are strict artifact counts. DeepSeek low has one output-header failure despite
-correct numeric data; GLM high has one invalid workbook-locator failure and one code
-runtime defect. Luna low makes two itinerary/cost errors and one cents-total error;
-its high sample corrects all three. One run cannot separate effort effects from sampling.
+- [DeepSeek low](results/paired-short-01/failure-analysis.md): chose a more expensive itinerary and included a pending reimbursement. Another export had correct data but an extra header.
+- [GLM high](results/paired-short-high-01/failure-analysis.md): referenced an undefined variable in code and invented workbook locator suffixes.
+- [Luna low](results/luna-low-01/failure-analysis.md): got two itinerary/cost answers and one cents total wrong. Its high sample corrected all three.
 
-| Configuration | Reported output tokens |
-|:--|--:|
-| DeepSeek high | 10,892 |
-| GLM high | 2,302 |
-| Luna high | 1,643 |
-| Luna low | 630 |
+[Full task matrix, input/output usage, and evidence →](results/three-model-comparison-01/report.md)
 
-Usage is CLI-reported, not verified charges. Harness contexts and token accounting differ;
-equal effort names do not establish equal compute. Luna used twelve Codex exec invocations
-per effort; underlying model requests/retries are not exposed. Both CLIs have native tools
-restricted, but retain different system context and tool presentation.
+**Read the counts carefully:** completion means the final artifact passes every check.
+Content and interface errors are distinguished in the linked analyses; excluded cases
+are never scored zero. One run cannot establish reliability, a general ranking, or a
+causal effort gain. Harness context and token accounting differ; equal effort names do
+not imply equal compute. Luna high and DeepSeek high tie on task completion here.
 
-[Full six-configuration matrix and usage](results/three-model-comparison-01/report.md) ·
-[Luna high evidence](results/luna-high-01/report.md) ·
-[Luna low evidence](results/luna-low-01/report.md) ·
-[Flash low/high comparison](results/effort-comparison-01/report.md) ·
-[Frozen task design](docs/paired-short-screen.md)
+## Tasks
 
-Browser/desktop results are small text-state simulations, not real application testing.
-GPT-6.1 Sol has not run on these replacement tasks. Larger workflows remain specifications.
-The earlier importer pilot and original prototypes remain archived below.
+Each pair changes a condition that changes the correct answer. Models see cases
+independently; no other model's answer enters their context.
 
-## Separate importer pilot (incomplete)
+| Domain | What changes between A and B | What is checked |
+|:--|:--|:--|
+| Coding | Delivery IDs are global vs. per account | Execute submitted Python on retry, atomicity, and deduplication cases |
+| Everyday | A meeting update is approved vs. draft | Feasible cheapest itinerary, applicable meeting, refund, and cash cost |
+| Browser simulation | A checkout quote changes | Inspect requested pages, then save the cheapest eligible plan |
+| Desktop simulation | The latest workbook is draft vs. approved | Open requested files, then export normalized, grouped cents |
 
-| Model | Harness | Reasoning effort | Importer result | Coverage |
-|:--|:--|:--|:--|:--|
-| DeepSeek v4.1 Flash | Command Code | low, observed | **11/11** | One starter; 3 requests |
-| GLM 5.3 Flash | Command Code | low, planned | Not run | Budget guard stopped pilot |
-| gpt-6.1-sol | Codex | Not yet selected for replacement run | Not run | Archived prototype only |
-| gpt-6-luna | Codex | Not yet selected for replacement run | Not run | Archived prototype only |
+Browser/desktop use **two-step text-state simulators**, not real browsers, applications,
+or visual perception. Reference solutions and deliberately wrong baselines are checked
+before paid runs; tasks/checkers stay frozen afterward. Newly authored cases may still
+use concepts familiar from training.
 
-The first valid episode reported 12,047 output tokens. Including invalid adapter attempts,
-reported output reached 33,805; one interrupted request has unknown usage. The 32,000
-soft guard stops between turns and can overshoot. Adapter failures are excluded from scores.
+[Task specification and limits](docs/paired-short-screen.md) · [Fixtures and checker](evalkit/shortscreen/tasks.py)
 
-## Prototype records
+## Run locally
+
+Requires Python 3.10+ and macOS for sandboxed code checks. No third-party Python packages.
+These commands make **no model calls**:
+
+```sh
+git clone https://github.com/Lewin671/model-evals.git
+cd model-evals
+python3 -m unittest discover -s tests -q
+
+# Qualify tasks and preview the Luna high plan.
+python3 -m evalkit.shortscreen.run --harness codex \
+  --models gpt-6-luna --effort high --output .runs/luna-high
+```
+
+Add `--execute` to spend quota using an existing CLI login. A full configuration has
+8 episodes and up to 12 response invocations. The runner uses a 120-second timeout and
+a 16,000 reported-output soft guard **per run**, shared when multiple models are selected.
+The guard stops between episodes and can overshoot.
+Codex's underlying request/retry count is not exposed. ZDR is unset only in evaluation
+child processes; personal settings remain unchanged.
+
+[Both harnesses, reproduction commands, and continuation rules →](docs/paired-short-screen.md)
+
+## Data for agents
+
+Start with **[results/index.json](results/index.json)**: exact model IDs, harnesses,
+reasoning effort, verification source, completion counts, usage, and paths to each
+manifest, per-case JSON, and report. Paths are relative to the repository root.
+A null grade is excluded, not a failed task. For code changes, read [AGENTS.md](AGENTS.md).
+
+<details>
+<summary>Earlier experiments and larger workflow designs</summary>
 
 <!-- RESULTS:START -->
 
-| Prototype | What it established | Records |
-|:--|:--|:--|
-| general-v2 | Pipeline checks worked; task difficulty did not establish useful model separation | [Findings](results/general-v2-screening-01/findings.md) · [Raw responses](results/general-v2-screening-01/responses.md) · [Full record](results/general-v2-screening-01/report.md) |
-| micro-v1 | Earlier, different-scope screen with a documented oracle correction | [Archived record](results/2026-10-15-micro-v1/report.md) |
-
-These are development artifacts, not leaderboards. The replacement coding pilot is reported separately above.
+- [Importer pilot](results/importer-native-calibration-01/report.md): one DeepSeek low artifact passed 11/11 checks; the paired pilot stopped at its token guard.
+- [general-v2](results/general-v2-screening-01/findings.md) and [micro-v1](results/2026-10-15-micro-v1/report.md): archived development records; difficulty did not support a capability ranking.
 
 <!-- RESULTS:END -->
 
-## Replacement task design
+[Larger workflow designs](docs/challenge-design.md) remain separate from the measured short screen. GPT-6.1 Sol has not run on the replacement tasks.
 
-The next tasks should require information gathering, coupled changes, adaptation and a
-verified final artifact/state. Goals and constraints are provided; a sequence of obvious
-buttons to press is not.
+</details>
 
-| Domain | Proposed workflow | What the checker must verify |
-|:--|:--|:--|
-| Coding | Add retryable incremental imports in a small existing repository | Parsing, persisted revisions, downstream totals and existing API behavior after interrupted replay |
-| Everyday | Revise a constrained appointment/travel plan after new information | Feasibility, source precedence, net cost and preservation of fixed commitments |
-| Browser reasoning | Compare offers across pages and detail views, then handle a changed quote | Current eligibility/total, saved comparison and evidence, after a real simulated state transition |
-| Desktop reasoning | Export normalized data from the correct workbook despite filters/dialogs | Actual output rows, totals, destination and preservation of the existing file |
+## Contribute
 
-[Read the concrete fixtures, hidden-check plan, difficulty tiers and pilot gates →](docs/challenge-design.md)
+Suggest a small task with two plausible approaches and a checkable expected result.
+Include the counterfactual that changes the answer. New model results should include
+exact model ID, harness, effort, usage, and reproducible evidence. Keep credentials and
+raw CLI transcripts private. See [AGENTS.md](AGENTS.md) for evaluation rules.
 
-The coding runner now supports repository reads/edits, public test feedback and a
-mid-episode requirement change. Hidden checks execute the final files. It has no real
-shell/network tool and uses three native repository tools through Command Code.
-[Implementation, acceptance checks and bounded pilot →](docs/importer-calibration.md)
-
-The browser/desktop track can use local deterministic simulators; no real accounts or
-applications are needed. Action-dependent observations and final-state checks are required.
-Text-state evaluation remains distinct from visual perception and real tool execution.
-
-## Calibration before another full campaign
-
-First implement the environments/checkers, obtain reference traces, and show that simple
-baselines fail for the intended reason. Use counterfactual variants that change the required
-decision, rather than only randomizing IDs.
-
-Then pilot **one workflow family, two independent variants, two target Flash models** at
-an explicit matched effort: four episodes, before expanding to Codex and the full matrix.
-Episodes may contain multiple model requests. Set request/token and action limits from
-reference traces; count actual usage rather than calling four sessions "four calls."
-
-Publish ceiling/floor effects and ties. Do not keep trying tasks until a preferred model
-wins. Keep semantic goal attainment separate from response-contract compliance.
-
-## Local checks
-
-Python 3.10+ and macOS sandbox-exec are required for prototype code checks. No third-party
-Python packages are needed. These checks and dry-run plans do not call models:
-
-```sh
-python3 -m unittest discover -s tests -v
-python3 -m evalkit.run --campaign configs/screening.json --max-calls 24
-
-# New workflow qualification gates; also makes no model calls.
-python3 -m evalkit.workflows.calibrate --seed 481
-```
-
-The current runner is the archived general-v2 prototype. Paid reproduction now requires
-an explicit opt-in; it is not the replacement workflow runner:
-
-```sh
-# Archival reproduction only. Consumes quota.
-python3 -m evalkit.run --campaign configs/screening.json --max-calls 24 \
-  --execute --allow-prototype
-```
-
-Reports can still be exported into an archive, but prototype runs cannot overwrite the
-main README comparison. Raw CLI logs, session IDs and personal settings remain private.
-Command Code reproduction unsets CMD_ZDR only in child processes, preserving normal settings.
-
----
-
-[MIT](LICENSE) · [Prototype methodology](docs/methodology.md) · [Challenge redesign](docs/challenge-design.md)
+**Star this repo to keep the comparisons handy.** [MIT licensed](LICENSE).

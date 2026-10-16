@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "snapshot": "three-model-comparison-01",
+  "suite": "paired-short-v1",
+  "path_base": "repository_root",
+  "report_path": "results/three-model-comparison-01/report.md",
+  "task_spec_path": "docs/paired-short-screen.md",
+  "task_checker_path": "evalkit/shortscreen/tasks.py",
+  "task_checker_sha256": "40b1f6f999afa65ee0836e90f3133b7f8af8b5f347c78112600233176c811180",
+  "task_pairs": 4,
+  "cases_per_configuration": 8,
+  "samples_per_case": 1,
+  "completion_semantics": "Strict final-artifact completion; inspect failure analyses to distinguish content and interface errors. Null per-case grades are excluded, never semantic zeroes.",
+  "comparability_limits": [
+    "Browser/desktop use text-state simulation, not real application control.",
+    "Harness context and usage accounting differ; equal effort names do not establish equal compute.",
+    "One sample cannot establish reliability, causal effort gains, or a general ranking.",
+    "Codex model/effort are configured, not independently exposed in JSONL; underlying request/retry count is unknown."
+  ],
+  "configurations": [
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "Command Code",
+      "reasoning_effort": "low",
+      "identity_evidence": "cli_request_events",
+      "planned_cases": 8,
+      "completed": 4,
+      "graded": 7,
+      "excluded_or_missing": 1,
+      "cli_invocations": 11,
+      "observed_model_requests": 11,
+      "reported_usage": {
+        "inputTokens": 151450,
+        "outputTokens": 4603,
+        "cacheReadTokens": 72832,
+        "reasoningTokens": null
+      },
+      "cli_version": "1.82.5",
+      "source_commit": "3bddcbef08b1523e4818e1111e8e1110bc4eb5cc",
+      "manifest_path": "results/paired-short-01/manifest.json",
+      "case_results_path": "results/paired-short-01/results.json",
+      "report_path": "results/paired-short-01/report.md"
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "Command Code",
+      "reasoning_effort": "high",
+      "identity_evidence": "cli_request_events",
+      "planned_cases": 8,
+      "completed": 8,
+      "graded": 8,
+      "excluded_or_missing": 0,
+      "cli_invocations": 12,
+      "observed_model_requests": 12,
+      "reported_usage": {
+        "inputTokens": 165455,
+        "outputTokens": 10892,
+        "cacheReadTokens": 79360,
+        "reasoningTokens": null
+      },
+      "cli_version": "1.82.5",
+      "source_commit": "bd816f5d9b1f3a559c2a66783cb5bf0c7264d4bc",
+      "manifest_path": "results/paired-short-high-01/manifest.json",
+      "case_results_path": "results/paired-short-high-01/results.json",
+      "report_path": "results/paired-short-high-01/report.md"
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "Command Code",
+      "reasoning_effort": "low",
+      "identity_evidence": "cli_request_events",
+      "planned_cases": 8,
+      "completed": 7,
+      "graded": 8,
+      "excluded_or_missing": 0,
+      "cli_invocations": 12,
+      "observed_model_requests": 12,
+      "reported_usage": {
+        "inputTokens": 204323,
+        "outputTokens": 1447,
+        "cacheReadTokens": 97920,
+        "reasoningTokens": null
+      },
+      "cli_version": "1.82.5",
+      "source_commit": "3bddcbef08b1523e4818e1111e8e1110bc4eb5cc",
+      "manifest_path": "results/paired-short-01/manifest.json",
+      "case_results_path": "results/paired-short-01/results.json",
+      "report_path": "results/paired-short-01/report.md"
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "Command Code",
+      "reasoning_effort": "high",
+      "identity_evidence": "cli_request_events",
+      "planned_cases": 8,
+      "completed": 6,
+      "graded": 8,
+      "excluded_or_missing": 0,
+      "cli_invocations": 12,
+      "observed_model_requests": 12,
+      "reported_usage": {
+        "inputTokens": 204205,
+        "outputTokens": 2302,
+        "cacheReadTokens": 114240,
+        "reasoningTokens": null
+      },
+      "cli_version": "1.82.5",
+      "source_commit": "bd816f5d9b1f3a559c2a66783cb5bf0c7264d4bc",
+      "manifest_path": "results/paired-short-high-01/manifest.json",
+      "case_results_path": "results/paired-short-high-01/results.json",
+      "report_path": "results/paired-short-high-01/report.md"
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "Codex",
+      "reasoning_effort": "low",
+      "identity_evidence": "invocation_configuration_only",
+      "planned_cases": 8,
+      "completed": 5,
+      "graded": 8,
+      "excluded_or_missing": 0,
+      "cli_invocations": 12,
+      "observed_model_requests": null,
+      "reported_usage": {
+        "inputTokens": 162835,
+        "outputTokens": 630,
+        "cacheReadTokens": 84864,
+        "reasoningTokens": 0
+      },
+      "cli_version": "codex-cli 0.162.1",
+      "source_commit": "9a975a29b68d3fce90e145bc8f9e232842a16894",
+      "manifest_path": "results/luna-low-01/manifest.json",
+      "case_results_path": "results/luna-low-01/results.json",
+      "report_path": "results/luna-low-01/report.md"
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "Codex",
+      "reasoning_effort": "high",
+      "identity_evidence": "invocation_configuration_only",
+      "planned_cases": 8,
+      "completed": 8,
+      "graded": 8,
+      "excluded_or_missing": 0,
+      "cli_invocations": 12,
+      "observed_model_requests": null,
+      "reported_usage": {
+        "inputTokens": 139195,
+        "outputTokens": 1643,
+        "cacheReadTokens": 23552,
+        "reasoningTokens": 1113
+      },
+      "cli_version": "codex-cli 0.162.1",
+      "source_commit": "9a975a29b68d3fce90e145bc8f9e232842a16894",
+      "manifest_path": "results/luna-high-01/manifest.json",
+      "case_results_path": "results/luna-high-01/results.json",
+      "report_path": "results/luna-high-01/report.md"
+    }
+  ],
+  "unknown_value_semantics": "null means not exposed or not reported; it never means zero."
+}
