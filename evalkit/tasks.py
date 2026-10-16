@@ -179,7 +179,8 @@ def suite(seed):
     snippets = [
         (ids[0], 'def get(db, actor, doc_id):\n    return db.documents.get(doc_id)', True),
         (ids[1], 'def get(db, actor, doc_id):\n    d=db.documents.get(doc_id)\n    if d is None or d.tenant != actor.tenant: raise PermissionError()\n    return d', False),
-        (ids[2], 'def search(db, q):\n    return db.execute("SELECT * FROM docs WHERE title = ?", (q,))', False),
+        # Parameter binding prevents injection, but the query still leaks across tenants.
+        (ids[2], 'def search(db, q):\n    return db.execute("SELECT * FROM docs WHERE title = ?", (q,))', True),
         (ids[3], 'def search(db, q):\n    return db.execute("SELECT * FROM docs WHERE title = \'" + q + "\'")', True),
         (ids[4], 'def cache_key(actor, doc_id):\n    return str(doc_id)', True),
         (ids[5], 'def cache_key(actor, doc_id):\n    return (actor.tenant, doc_id)', False)]

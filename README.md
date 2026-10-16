@@ -39,6 +39,9 @@ The first measured comparison is being prepared. No illustrative or estimated sc
 Identical effort labels do not guarantee identical reasoning budgets across model families.
 Different harnesses also affect prompts and execution behavior. [Evaluation limits →](docs/methodology.md#what-this-does-and-does-not-measure)
 
+The first campaign includes a documented [security-oracle correction](docs/adjudications/001-security-triage.md).
+It applies to every saved answer, without additional model calls; original scores remain available for audit.
+
 ## The evaluation set
 
 | Task | Capability | How it is checked |

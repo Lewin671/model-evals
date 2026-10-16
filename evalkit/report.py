@@ -9,9 +9,11 @@ import re
 
 USAGE_FIELDS=("inputTokens","outputTokens","cacheReadTokens","cacheWriteTokens","reasoningTokens")
 ROW_FIELDS=("model","harness","effort","variant","task","dimension","status","score","passed","total",
-            "exit_code","prompt_sha256","observed_models","observed_efforts","identity_source")
+            "exit_code","prompt_sha256","observed_models","observed_efforts","identity_source",
+            "score_before_adjudication","adjudication")
 MANIFEST_FIELDS=("seed","suite","suite_fingerprint","variants","models","tasks","cli_versions","cli_version",
-                 "git_commit","adapter_commits","acquisition_notes","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools")
+                 "git_commit","adapter_commits","acquisition_notes","grading_fingerprint","ground_truth_revision",
+                 "adjudication_commit","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools")
 START="<!-- RESULTS:START -->"
 END="<!-- RESULTS:END -->"
 
@@ -28,7 +30,7 @@ def prepare(directories):
     for directory in directories:
         manifest=json.loads((directory/"manifest.json").read_text())
         if manifests:
-            for key in ("seed","suite","suite_fingerprint","tasks"):
+            for key in ("seed","suite","suite_fingerprint","grading_fingerprint","ground_truth_revision","tasks"):
                 if manifest.get(key)!=manifests[0].get(key):
                     raise ValueError("cannot combine runs with different "+key)
         manifests.append({k:manifest[k] for k in MANIFEST_FIELDS if k in manifest})
@@ -91,6 +93,9 @@ def markdown(data):
            leaderboard(data), "", "Equal task weights. A missing or failed infrastructure run receives no aggregate score.",
            "Token accounting is CLI-reported; cache and reasoning counters differ between providers. No dollar costs are inferred.",
            "", "## Task breakdown", "", "| Model | Effort | Source | Task | Score | Checks | Status |", "|:--|:--|:--|:--|--:|--:|:--|"]
+    if first.get("ground_truth_revision"):
+        note="**Ground truth correction:** tenant-isolation classification in security triage was corrected for every saved answer, without new model calls. [Adjudication and original scores](../../docs/adjudications/001-security-triage.md)."
+        lines[4:4]=[note, ""]
     for r in data["results"]:
         checks=f"{r['passed']}/{r['total']}" if "passed" in r else "—"
         lines.append(f"| `{r['model']}` | {r['effort']} | {r['harness']} | {r['task']} | {percent(r.get('score'))} | {checks} | {r['status']} |")
@@ -109,6 +114,9 @@ def markdown(data):
               "Command Code ZDR enforcement is disabled only in evaluation child processes; this setting does not control Codex retention.",
               "", "Six tasks are a screening sample, not a statistically established general ranking. A tied score is a tie on this suite.",
               "Code cases within one task are correlated. Different harnesses remain a confound even with identical prompts and effort labels.", ""]
+    if first.get("grading_fingerprint"):
+        lines += [f"Corrected grading fingerprint: `{first['grading_fingerprint']}`.",
+                  f"Adjudication commit: `{first.get('adjudication_commit','unknown')}`.",""]
     return "\n".join(lines)
 
 

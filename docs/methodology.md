@@ -25,6 +25,12 @@ The suite fingerprint hashes the exact generator and grader source. Reports can 
 separate runs only when seed, fingerprint, task IDs, and prompt hashes match.
 Duplicate configuration/task attempts are rejected rather than silently overwritten.
 
+An objectively demonstrated oracle error can be corrected after acquisition only with a
+public adjudication, an independent reproduction, a regression test, and uniform local
+regrading of all saved answers. Preserve original scores and fingerprints; record the
+corrected fingerprint and commit separately. Do not change prompts, retry models, or
+adjust scoring weights. The first campaign has one such [adjudication](adjudications/001-security-triage.md).
+
 ## Scoring
 
 Each of six tasks contributes equally to the overall mean. Each code task uses 24 inputs;

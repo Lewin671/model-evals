@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import sqlite3
+import hashlib
 import unittest
 from unittest.mock import patch
 
@@ -11,6 +13,7 @@ from evalkit.run import command, environment, invoke, parse_result, version_line
 from evalkit.tasks import LEDGER_REF, PAGE_REF, merge, oracle, ref, suite
 from evalkit.report import render, prepare, scorecard
 from evalkit.adapters import Variant, codex_command, parse_codex
+from evalkit.regrade import apply as adjudicate
 import xml.etree.ElementTree as ET
 
 
@@ -207,6 +210,34 @@ print(json.dumps({'type':'result','subtype':'success','finalText':sys.stdin.read
 
     def test_version_update_notice_does_not_change_identity(self):
         self.assertEqual(version_line("Updated 1.82.3 → 1.82.5\n1.82.5\n"),"1.82.5")
+
+    def test_security_oracle_matches_concrete_tenant_leak(self):
+        db=sqlite3.connect(":memory:")
+        db.execute("CREATE TABLE docs (tenant TEXT, title TEXT)")
+        db.executemany("INSERT INTO docs VALUES (?,?)",[("a","shared"),("b","shared")])
+        self.assertEqual(len(db.execute("SELECT * FROM docs WHERE title = ?",("shared",)).fetchall()),2)
+        task=suite(1)[3]
+        snippets=json.loads(task.prompt.split("Snippets:\n",1)[1])
+        parameterized=next(s["id"] for s in snippets if "WHERE title = ?" in s["code"])
+        self.assertIn(parameterized,task.expected["vulnerable_ids"])
+        db.close()
+
+    def test_adjudication_preserves_prior_scores_and_is_not_repeatable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p=Path(directory);task=suite(1)[3]
+            variant=Variant("codex","fake-model","high")
+            (p/"manifest.json").write_text(json.dumps({"seed":1,"variants":[variant.record()]}))
+            row={"task":task.id,"score":0,"status":"graded","artifact_stem":"saved",
+                 "prompt_sha256":hashlib.sha256(task.prompt.encode()).hexdigest()}
+            (p/"results.json").write_text(json.dumps([row]))
+            (p/"saved.prompt.txt").write_text(task.prompt)
+            (p/"saved.answer.txt").write_text(json.dumps(task.expected))
+            adjudicate(p)
+            updated=json.loads((p/"results.json").read_text())[0]
+            self.assertEqual(updated["score_before_adjudication"],0)
+            self.assertEqual(updated["score"],1)
+            self.assertEqual(json.loads((p/"results.before-adjudication-001.json").read_text())[0]["score"],0)
+            with self.assertRaises(ValueError): adjudicate(p)
 
     def test_resume_never_repeats_a_recorded_model_call(self):
         with tempfile.TemporaryDirectory() as directory:
