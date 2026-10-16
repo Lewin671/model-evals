@@ -32,14 +32,14 @@ model-specific tool presentation remains a limitation when interpreting the resu
 
 ## Fixed pilot
 
-Two models, both explicitly high effort: deepseek/deepseek-v4.1-flash and z-ai/glm-5.3-flash.
+Two models, both explicitly low effort: deepseek/deepseek-v4.1-flash and z-ai/glm-5.3-flash.
 Two different starter implementations: stream and state. Order: DeepSeek/stream,
 GLM/stream, GLM/state, DeepSeek/state. Identical goals, starting files and random seed
 within a variant; subsequent observations depend on the model's actual actions.
 
-Each episode has the same **five model-turn cap**. Four episodes therefore allow at most
-20 further main-loop requests. The two adapter setup requests are included in the same
-24-request budget, so at most 22 observed requests are planned in total. The initial
+Each episode has the same **three model-turn cap**. Four episodes therefore allow at most
+12 further main-loop requests. Nine prior adapter requests are included in the same
+24-request budget, so at most 21 observed requests are planned in total. The initial
 32,000 reported-output-token guard also includes setup cost and stops between turns;
 an in-flight request can overshoot it. These limits do not establish a dollar cap.
 
@@ -68,6 +68,18 @@ A GET of the official Provider API model endpoint returned HTTP 403, so no Provi
 inference was attempted and no account settings or subscription were changed. The pilot
 uses the existing CLI account, with CMD_ZDR unset only in child processes and no change
 to personal reasoning-effort defaults.
+
+A third attempt exposed a missing `required: []` in the zero-argument test-tool schema.
+The CLI failed before running tests. The DeepSeek episode (five requests, high effort)
+and interrupted GLM episode (two request starts, high effort) are invalid harness evidence.
+The original 0/11 observation is retained privately and excluded from model scores.
+One interrupted request has no reported token usage. Across all invalid attempts, reported
+output is 21,758 tokens; this is a lower bound, not a complete billing figure.
+
+The corrected schema is checked recursively before inference; test-tool SDK errors now
+stop execution. The effective pilot uses matched low effort and three turns to limit
+further cost. Task inputs and acceptance criteria remain frozen. This tighter budget
+measures bounded workflow performance and cannot establish maximum model capability.
 
 ## Reproduce
 

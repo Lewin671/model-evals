@@ -42,15 +42,15 @@ def usage_from_events(events):
     return usage
 
 
-def episode(folder,model,variant,seed,turn_cap,output_budget):
+def episode(folder,model,variant,seed,turn_cap,output_budget,effort='low'):
     base=Path(__file__).parent.resolve()
     # The CLI's cwd has no ancestor workspace instructions or hidden graders.
     with tempfile.TemporaryDirectory(prefix='model-eval-native-',dir='/private/tmp') as d:
         root=Path(d);materialize(root,variant)
-        task=CONTRACT.split('## Available file tools')[0]+NATIVE_PROTOCOL
+        task=CONTRACT.split('## Available file tools')[0]+NATIVE_PROTOCOL+f'\nModel-request budget: {turn_cap}. Batch source reads, source replacements and tests when useful. Final prose is optional; completed files are the goal.\n'
         (root/'README.md').write_text(task)
         config=root/'.commandcode';config.mkdir()
-        (config/'settings.json').write_text(json.dumps({'tasteLearning':False,'reasoningEffort':{model:'high'},
+        (config/'settings.json').write_text(json.dumps({'tasteLearning':False,'reasoningEffort':{model:effort},
             'mods':{'disabled':['titling','learning']},'permissions':{
              'allow':['repo_read','repo_write','repo_test','search_tools'],
              'deny':['shell_command','read_file','write_file','edit_file','web_search','web_fetch','agent','mcp__*']}}))
@@ -79,14 +79,14 @@ def episode(folder,model,variant,seed,turn_cap,output_budget):
         raw=(folder/'cli.ndjson').read_text();events=frames(raw)
         usage=usage_from_events(events)
         state=json.loads(control.read_text()) if control.exists() else {}
-        result={'model':model,'effort':'high','harness':'Command Code / native repository tools',
+        result={'model':model,'effort':effort,'harness':'Command Code / native repository tools',
             'variant':variant,'turn_cap':turn_cap,'exit_code':process.returncode,'usage':usage,
             'change_delivered':state.get('change_delivered',False),'control':state}
         try:
             final,_=parse_result(raw)
             result['models_observed']=final['observed_models'];result['efforts_observed']=final['observed_efforts']
             (folder/'answer.md').write_text(final.get('finalText',''))
-            valid=not timed_out and final['observed_models']==[model] and final['observed_efforts']==['high'] and process.returncode in (0,8) and final.get('subtype') in ('success','max_turns')
+            valid=not timed_out and not state.get('fatal_tool_error') and final['observed_models']==[model] and final['observed_efforts']==[effort] and process.returncode in (0,8) and final.get('subtype') in ('success','max_turns')
             result['stop']=final.get('stopReason') or final.get('subtype')
         except ValueError:valid=False;result['stop']='invalid_cli_output'
         result['tool_calls']=[e['event'].get('toolName') for e in events if isinstance(e.get('event'),dict) and e['event'].get('type')=='tool_running']
@@ -105,6 +105,9 @@ def main():
     parser.add_argument('--seed',type=int,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--setup-attempts',type=Path,nargs='*',default=[])
+    parser.add_argument('--invalid-adapter-runs',type=Path,nargs='*',default=[])
+    parser.add_argument('--effort',choices=['low','high'],default='low')
+    parser.add_argument('--turn-cap',type=int,choices=[3,4,5],default=3)
     parser.add_argument('--execute',action='store_true')
     args=parser.parse_args()
     prior={'cliInvocations':0,'observedModelRequests':0,'inputTokens':0,'outputTokens':0,'cacheReadTokens':0}
@@ -113,11 +116,23 @@ def main():
         if old['seed']!=args.seed:parser.error('setup and calibration task seeds must match')
         counts=setup_usage(path)
         for k,v in counts.items():prior[k]+=v
+    unknown_usage=0
+    for path in args.invalid_adapter_runs:
+        combined=[]
+        for log in path.glob('*/cli.ndjson'):combined.extend(frames(log.read_text()))
+        errors=[f['event'] for f in combined if isinstance(f.get('event'),dict) and f['event'].get('type')=='tool_errored']
+        if not any(e.get('toolName')=='repo_test' and 'flatMap' in str(e.get('error')) for e in errors):
+            parser.error('invalidated run must contain evidence of the test-tool schema crash')
+        for log in path.glob('*/cli.ndjson'):
+            events=frames(log.read_text());counts=usage_from_events(events)
+            for k,v in counts.items():prior[k]+=v
+            ends=sum(isinstance(f.get('event'),dict) and f['event'].get('type')=='model_request_end' for f in events)
+            unknown_usage+=max(0,counts['observedModelRequests']-ends)
     gates=preflight(args.seed)
     plan={'workflow':'incremental-importer-native-v1','seed':args.seed,'models':MODELS,'variants':VARIANTS,
-        'effort':'high','turn_cap_per_episode':5,'max_observed_requests_including_setup':24,
+        'effort':args.effort,'turn_cap_per_episode':args.turn_cap,'max_observed_requests_including_setup':24,
         'output_token_guard_including_setup':32000,'setup_usage':prior,'fingerprint':fingerprint(),
-        'preflight':'passed','zdr_enforced':False}
+        'preflight':'passed','zdr_enforced':False,'prior_requests_with_unreported_usage':unknown_usage}
     print(json.dumps(plan,indent=2),flush=True)
     if not args.execute:return
     args.output.mkdir(parents=True,exist_ok=False)
@@ -127,10 +142,10 @@ def main():
     usage=dict(prior);results=[]
     (args.output/'results.json').write_text('[]');(args.output/'usage.json').write_text(json.dumps(usage,indent=2))
     for i,(model,variant) in enumerate([(MODELS[0],'stream'),(MODELS[1],'stream'),(MODELS[1],'state'),(MODELS[0],'state')],1):
-        if usage['observedModelRequests']+5>24 or usage['outputTokens']>=32000:break
+        if usage['observedModelRequests']+args.turn_cap>24 or usage['outputTokens']>=32000:break
         folder=args.output/f'{i:02}-{model.split("/")[-1]}-{variant}';folder.mkdir()
         print(f'[{i}/4] {model} / {variant}',flush=True)
-        result=episode(folder,model,variant,args.seed,5,32000-usage['outputTokens'])
+        result=episode(folder,model,variant,args.seed,args.turn_cap,32000-usage['outputTokens'],args.effort)
         for k,v in result['usage'].items():usage[k]+=v
         results.append(result)
         (args.output/'results.json').write_text(json.dumps(results,indent=2));(args.output/'usage.json').write_text(json.dumps(usage,indent=2))

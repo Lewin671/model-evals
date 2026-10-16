@@ -25,9 +25,11 @@ class ImporterWorkflow(unittest.TestCase):
                 MODEL_EVAL_BRIDGE=str(base/'bridge.py'),MODEL_EVAL_SEED='481',MODEL_EVAL_VARIANT='stream',
                 MODEL_EVAL_CHANGE=json.dumps('ADDED REQUIREMENT'),MODEL_EVAL_CONTROL=str(Path(d)/'control.json'))
             script='''import make from '''+json.dumps((base/'native_tools.mjs').as_uri())+''';
-const tools={};let hooks;let active=[];
+const tools={};let hooks;let active=[];const listeners={};
 make({addTool:t=>{tools[t.schema.name]=t},setActiveTools:a=>{active=a},getActiveTools:()=>active,
-      hooks:h=>{hooks=h},on:()=>{}});
+      hooks:h=>{hooks=h},on:(name,fn)=>{listeners[name]=fn}});
+function validate(schema){if(schema.type==='object' && !Array.isArray(schema.required))throw Error('SDK requires required array');for(const value of Object.values(schema.properties||{}))validate(value);if(schema.items)validate(schema.items)}
+for(const tool of Object.values(tools))validate(tool.schema.input_schema);
 const state={messages:[]};hooks.onTurnStart({state,turnNumber:1});
 if(active.length!==3 || hooks.appendSystemPrompt().includes('ADDED REQUIREMENT'))throw Error('wrong initial surface');
 const read=await tools.repo_read.run({input:{paths:['ledger/api.py']}});
@@ -41,6 +43,8 @@ if(!hooks.appendSystemPrompt().includes('ADDED REQUIREMENT'))throw Error('change
 const after=await tools.repo_test.run({input:{}});
 const checks=JSON.parse(after.content[0].text).public_checks;
 if(checks.total!==4 || checks.passed!==4)throw Error('changed tests failed');
+listeners.tool_errored({toolName:'repo_test',error:'SDK flatMap failure'});
+if(!hooks.shouldStopAfterTurn())throw Error('adapter failure must stop');
 '''
             env['TEST_REFERENCE_FILES']=json.dumps({k:v for k,v in sources('stream',reference=True).items() if k in ('ledger/api.py','ledger/parser.py','ledger/store.py')})
             result=subprocess.run([node,'--input-type=module','-e',script],capture_output=True,text=True,env=env)

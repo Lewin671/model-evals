@@ -6,10 +6,11 @@ export default function (cmd) {
   let round = 0;
   let changed = false;
   let outputTokens = 0;
+  let fatalToolError = null;
   const names = ['repo_read', 'repo_write', 'repo_test'];
   const record = data => {
     if (process.env.MODEL_EVAL_CONTROL) {
-      writeFileSync(process.env.MODEL_EVAL_CONTROL, JSON.stringify({round, change_delivered: changed, outputTokens, active_tools:cmd.getActiveTools(), ...data}));
+      writeFileSync(process.env.MODEL_EVAL_CONTROL, JSON.stringify({round, change_delivered: changed, outputTokens, fatal_tool_error:fatalToolError, active_tools:cmd.getActiveTools(), ...data}));
     }
   };
   const dispatch = action => new Promise((resolve) => {
@@ -34,10 +35,10 @@ export default function (cmd) {
     input_schema:{type:'object',properties:{paths:{type:'array',items:{type:'string',enum:['README.md','ledger/__init__.py','ledger/parser.py','ledger/store.py','ledger/api.py']}}},required:['paths'],additionalProperties:false}},
     readOnly:true,shouldDefer:false,run:({input})=>bridge({tool:'read',paths:input.paths})});
   cmd.addTool({schema:{name:'repo_write',description:'Replace complete contents of one or more of the three editable source files.',
-    input_schema:{type:'object',properties:{files:{type:'object',properties:{'ledger/api.py':{type:'string'},'ledger/parser.py':{type:'string'},'ledger/store.py':{type:'string'}},additionalProperties:false}},required:['files'],additionalProperties:false}},
+    input_schema:{type:'object',properties:{files:{type:'object',properties:{'ledger/api.py':{type:'string'},'ledger/parser.py':{type:'string'},'ledger/store.py':{type:'string'}},required:[],additionalProperties:false}},required:['files'],additionalProperties:false}},
     readOnly:false,shouldDefer:false,run:({input})=>bridge({tool:'write',files:input.files})});
   cmd.addTool({schema:{name:'repo_test',description:'Run public repository checks; returns inputs, expected values and observed behavior. Use instead of shell or other test tools.',
-    input_schema:{type:'object',properties:{},additionalProperties:false}},readOnly:true,shouldDefer:false,run:()=>bridge({tool:'test'})});
+    input_schema:{type:'object',properties:{},required:[],additionalProperties:false}},readOnly:true,shouldDefer:false,run:()=>bridge({tool:'test'})});
   cmd.setActiveTools(names);
   cmd.hooks({
     onTurnStart:({state,turnNumber})=>{
@@ -50,7 +51,12 @@ export default function (cmd) {
       if(!changed){changed=true;record({});return {continue:true,reason:change};}
       return {continue:false};
     },
-    shouldStopAfterTurn:()=>outputTokens>=Number(process.env.MODEL_EVAL_OUTPUT_BUDGET || 32000),
+    shouldStopAfterTurn:()=>Boolean(fatalToolError) || outputTokens>=Number(process.env.MODEL_EVAL_OUTPUT_BUDGET || 32000),
   });
   cmd.on('model_request_end',event=>{outputTokens+=event.usage?.outputTokens || 0;record({});});
+  cmd.on('tool_errored',event=>{
+    if(event.toolName==='repo_test' || String(event.error).includes('flatMap')) {
+      fatalToolError=String(event.error);record({});
+    }
+  });
 }
