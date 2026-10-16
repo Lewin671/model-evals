@@ -18,7 +18,7 @@ from .adapters import Variant, codex_command, parse_codex
 
 def suite_fingerprint():
     base=Path(__file__).parent
-    return hashlib.sha256(b"".join((base/name).read_bytes() for name in ("tasks.py","grading.py"))).hexdigest()
+    return hashlib.sha256(b"".join((base/name).read_bytes() for name in ("tasks.py","general.py","grading.py","rubrics.py"))).hexdigest()
 
 
 def version_line(text):
@@ -93,6 +93,7 @@ def invoke(model, task, turns, timeout, effort="high", harness="command-code"):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, help="fresh random seed by default; reuse for paired reproduction")
+    parser.add_argument("--suite",choices=["general-v2"],default="general-v2")
     parser.add_argument("--models", nargs="+")
     parser.add_argument("--harness",choices=["command-code","codex"],default="command-code")
     parser.add_argument("--effort",default="high",help="explicit reasoning effort, default high")
@@ -130,13 +131,16 @@ def main():
         order=variants[offset:]+variants[:offset]
         schedule.extend((v,t) for v in (order if i%2==0 else order[::-1]))
     if len(schedule)>args.max_calls: parser.error("call count exceeds --max-calls; no partial run")
-    plan={"seed":seed,"suite":"micro-v1","suite_fingerprint":suite_fingerprint(),
+    domains=list(dict.fromkeys(t.domain for t in tasks))
+    plan={"seed":seed,"suite":args.suite,"suite_fingerprint":suite_fingerprint(),
           "calls":len(schedule),"variants":[v.record() for v in variants],
           "models":[v.model for v in variants],"tasks":[t.id for t in tasks],
+          "task_domains":{t.id:t.domain for t in tasks},"domain_weights":{d:1/len(domains) for d in domains},
+          "scope":"subset" if args.tasks and len(tasks)!=6 else "full",
           "max_turns":args.max_turns,"timeout_seconds":args.timeout,"zdr_enforced":False,
           "tools":"no tool use permitted", "reasoning_effort":"explicit per variant"}
     if previous:
-        for key in ("seed","suite_fingerprint","variants","tasks","max_turns","timeout_seconds"):
+        for key in ("seed","suite","suite_fingerprint","variants","tasks","task_domains","domain_weights","max_turns","timeout_seconds"):
             if previous.get(key)!=plan.get(key): parser.error("resume plan differs in "+key)
     print(json.dumps(plan,indent=2),flush=True)
     if not args.execute: return
@@ -183,7 +187,7 @@ def main():
             (output/f"{stem}.ndjson").write_text(out)
             (output/f"{stem}.stderr.txt").write_text(err)
         row={"model":model,"harness":variant.harness,"effort":variant.effort,"variant":variant.id,
-             "task":task.id,"dimension":task.dimension,"exit_code":rc,"artifact_stem":stem,
+             "task":task.id,"dimension":task.dimension,"domain":task.domain,"exit_code":rc,"artifact_stem":stem,
              "prompt_sha256":hashlib.sha256(task.prompt.encode()).hexdigest()}
         try:
             result,tool_count=parse_result(out) if variant.harness=="command-code" else parse_codex(out)

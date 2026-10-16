@@ -33,10 +33,13 @@ adjust scoring weights. The first campaign has one such [adjudication](adjudicat
 
 ## Scoring
 
-Each of six tasks contributes equally to the overall mean. Each code task uses 24 inputs;
-its score is the fraction returning the expected JSON-compatible value without changing the input.
-Structured tasks require an exact answer, including field sets and specified ordering.
-Markdown fences, commentary outside JSON, and incorrect schemas are format errors worth zero.
+General-v2 gives coding, everyday tasks, browser snapshot reasoning and desktop snapshot
+reasoning 25% each. Average bundle scores within a domain before averaging domains.
+Code tasks use 24 hidden inputs and score by pass fraction without input mutation.
+The calendar accepts any feasible optimum, and scores a feasible suboptimal schedule by
+selected priority divided by optimum. Expense fields and UI checkpoints receive equal
+credit within their bundles. Equivalent accepted actions and click regions are supported.
+Markdown fences and incorrect response schemas are format errors worth zero.
 
 A model that returns invalid code or the wrong result gets a model failure/partial score.
 A CLI, routing, identity, credit, or infrastructure failure has no model score. A configuration
@@ -44,7 +47,7 @@ needs every task scored before receiving an aggregate. Missing results are shown
 Individual code cases are correlated because the same generated program handles them all.
 
 Reference solutions are checked against known hand-specified cases and incorrect solutions.
-The ledger and pagination also use independent oracle implementations. All graders and
+Pagination also uses an independent oracle implementation. All graders and
 generators are public; "hidden" means excluded from the model's evaluation context.
 
 ## CLI adapters
@@ -99,15 +102,24 @@ Subscription quota and actual billed charges must be checked in the respective a
 
 ## What this does and does not measure
 
-The suite measures short-form implementation, state handling, design repair, security precision,
-evidence handling, JSON compliance and constrained optimization. Six tasks are a low-cost screen.
-It does not establish a broad model ranking, statistical significance, or contamination-free status.
-All-perfect scores mean a tie on this suite, not equal overall capability. Do not invent a winner.
+General-v2 measures short implementation/repair, constrained planning, bookkeeping and
+next-action decisions from structured UI states. See [task construction](general-v2.md)
+for checkpoint details, equivalent-answer acceptance and scoring.
 
-It does not evaluate multi-file repository navigation, sustained tool use, autonomous development,
-vision, web research, or context-window limits. It does not make hardware-performance claims.
-Generated data reduces memorization of exact outputs, but task templates can enter future training.
-When adding harder tasks, define and freeze a new suite before testing, and retain the old results.
+Browser/desktop tasks are independent snapshots supplied in one response request. They
+provide no real tools, no visual input, no model-dependent next observation and no final
+application state. They cannot establish real browser/computer use, interactive recovery,
+visual perception, long-horizon execution or tool-call reliability.
+
+Six bundles are a low-cost screening sample, not a broad or statistically established
+model ranking. A tied score is a tie on this suite. Code inputs and UI checkpoints within
+a bundle are correlated. Static public templates may enter training even when seeds vary.
+Future suites need new task families, and any ceiling effect should be reported honestly.
+
+The archived [micro-v1 round](../results/2026-10-15-micro-v1/report.md) used a different
+scope and scoring rule, including a retired security task. It is retained for audit,
+not mixed into current scores or presented as the current capability comparison.
+No hardware-speed conclusion is measured by either round.
 
 ## References
 

@@ -7,13 +7,13 @@
 [![Checks](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml/badge.svg)](https://github.com/Lewin671/model-evals/actions/workflows/checks.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat)](#run-an-evaluation)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
-[![Suite](https://img.shields.io/badge/suite-micro--v1-0f766e?style=flat)](#the-evaluation-set)
+[![Suite](https://img.shields.io/badge/suite-general--v2-0f766e?style=flat)](#the-evaluation-set)
 
 [Results](#results) · [Evaluation set](#the-evaluation-set) · [Methodology](docs/methodology.md) · [Reproduce](#run-an-evaluation)
 
 </div>
 
-A compact, open evaluation of model capabilities on original software and reasoning tasks.
+A compact evaluation of general coding, everyday tasks, browser workflow reasoning, and desktop workflow reasoning.
 Models run through **Command Code** or **Codex**; every result includes the exact model,
 **reasoning effort**, harness, per-task score, and reported token usage.
 
@@ -24,59 +24,45 @@ its code against hidden inputs, and keep the cost low enough to rerun deliberate
 
 <!-- RESULTS:START -->
 
-| Model | Reasoning effort | Source | Score | Full passes | Input / output tokens |
-|:--|:--|:--|--:|--:|--:|
-| `gpt-6.1-sol` | `high` | Codex | **100.0%** | 6/6 | 73,486 / 1,797 |
-| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | **83.3%** | 5/6 | 82,457 / 6,069 |
-| `z-ai/glm-5.3-flash` | `high` | Command Code | **82.6%** | 4/6 | 101,812 / 3,074 |
-| `gpt-6-luna` | `high` | Codex | **82.6%** | 4/6 | 69,314 / 2,121 |
-
-![Per-task scorecard](results/2026-10-15-micro-v1/scorecard.svg)
-
-[Full results](results/2026-10-15-micro-v1/report.md) · [Machine-readable data](results/2026-10-15-micro-v1/summary.json) · [Model responses](results/2026-10-15-micro-v1/responses.md)
-
-One attempt per task; screening results, not a general model ranking.
+The general-v2 comparison is being prepared. No estimated scores are shown.
 
 <!-- RESULTS:END -->
 
-**Read the scores as a screening result.** Six tasks cannot establish a general model ranking.
-Identical effort labels do not guarantee identical reasoning budgets across model families.
-Different harnesses also affect prompts and execution behavior. [Evaluation limits →](docs/methodology.md#what-this-does-and-does-not-measure)
+**Four equally weighted domains.** Coding, everyday tasks, browser snapshots and desktop snapshots
+contribute 25% each. Browser/desktop scores measure decisions from structured state, not actual
+browsing, visual perception or end-to-end computer operation.
 
-The first campaign includes a documented [security-oracle correction](docs/adjudications/001-security-triage.md).
-It applies to every saved answer, without additional model calls; original scores remain available for audit.
-
-**What separated this run:** Sol caught a missing tenant filter that the other three missed.
-DeepSeek and Sol also handled the Boolean-versus-integer deletion marker correctly; GLM and Luna
-missed that boundary. All four passed the evaluated ledger, pagination, evidence and planning checks.
-[Read the findings and concrete counterexample →](results/2026-10-15-micro-v1/findings.md)
+[Task construction and scoring →](docs/general-v2.md) · [Archived micro-v1 results](results/2026-10-15-micro-v1/report.md)
 
 ## The evaluation set
 
-| Task | Capability | How it is checked |
+| Domain | Task bundle | What separates a useful answer from a plausible one |
 |:--|:--|:--|
-| **Config merge** | Recursive implementation, deletion semantics, type changes | Execute against 24 hidden inputs |
-| **Reservation ledger** | State transitions, idempotency, expiration boundaries | Execute against 24 hidden event sequences |
-| **Snapshot pagination** | Repair an incorrect design, stable cursors, filter ordering | Execute against 24 hidden inputs |
-| **Security triage** | Find concrete multi-tenant and injection defects without false positives | Exact vulnerable-ID set |
-| **Evidence reconciliation** | Merge field-level evidence, retain uncertainty, ignore embedded instructions | Exact structured answer |
-| **Release selection** | Optimize under dependencies, exclusions, a budget, and tie-breaking rules | Exhaustive-search oracle |
+| Coding | Config merge | Implements nested replacement/deletion precisely; passes 24 hidden inputs |
+| Coding | Pagination repair | Fixes filtering, stable ordering and cursor boundaries; passes 24 hidden inputs |
+| Everyday | Morning planner | Produces a feasible schedule and maximizes stated priorities; equivalent optima accepted |
+| Everyday | Expense reconciliation | Uses latest revisions, removes duplicates, subtracts credits and leaves unknown exchange rates unresolved |
+| Browser (simulated) | Six DOM checkpoints | Chooses by total cost and availability, applies pending filters, clears overlays, refreshes stale state and verifies completion |
+| Desktop (simulated) | Six structured screen checkpoints | Tracks focus, filenames and modal state; converts coordinate frames; waits for all files and reacquires resized geometry |
 
-Each model answers each task **once**. Code tasks receive partial credit by test pass rate;
-structured reasoning tasks receive 0 or 1. Every task contributes one sixth of the total.
-The 72 code inputs are local checks, not 72 extra model calls or independent benchmark questions.
+Each bundle costs **one model invocation**, so four models × six bundles = **24 CLI invocations**,
+including **12 through Command Code**. The local code tests and UI checkpoints add no model calls.
+Every configuration answers each bundle once, without feedback or a second attempt.
+
+UI checkpoints are independent: the model selects the next action from the state provided.
+Multiple valid dismissals and click points inside the correct control are accepted. Missing, stale,
+blocked, invented or premature actions fail their checkpoint. This is a low-cost diagnostic for
+state understanding and action selection; it does not test whether a model can execute the tools.
 
 <details>
 <summary><strong>Why generated tasks?</strong></summary>
 
-The tasks were written for this repository rather than copied from public benchmark problem sets.
-A fresh seed changes event sequences, identifiers, data, and optimization instances. All variants
-in a comparison receive identical prompt bytes and hidden inputs. Generators and oracles are
-excluded from model context.
+Fresh seeds vary inputs, invoice revisions, calendar constraints, product prices, node IDs,
+window origins and checkpoint order. Model variants share identical prompt bytes and local test data.
+No public benchmark questions were copied; the tasks were written for this project.
 
-This reduces exact-answer memorization; it does **not** prove absence of training contamination.
-Public templates can eventually become training data. Future evaluations need new independent
-templates, not just different seeds.
+Randomization reduces exact-answer memorization, but does not guarantee absence of training
+contamination or prevent learning public templates. Future suites need new task families, not just new seeds.
 
 </details>
 
@@ -101,7 +87,7 @@ Start smaller, or compare a model at two different reasoning efforts:
 
 ```sh
 # Two Command Code models × two tasks = four CLI invocations.
-python3 -m evalkit.run --tasks reservation-ledger security-triage --execute
+python3 -m evalkit.run --tasks config-merge browser-snapshots --execute
 
 # Explicit Codex model and reasoning effort; same task subset if desired.
 python3 -m evalkit.run --harness codex --models gpt-6.1-sol --effort medium --execute
@@ -160,4 +146,4 @@ CI runs correctness checks and fake-CLI integration tests only. It never calls p
 
 ---
 
-[MIT](LICENSE) · [Methodology](docs/methodology.md) · [Source tasks](evalkit/tasks.py)
+[MIT](LICENSE) · [Methodology](docs/methodology.md) · [Current task generator](evalkit/general.py)

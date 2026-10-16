@@ -7,7 +7,7 @@ import subprocess
 
 from .grading import grade
 from .run import suite_fingerprint
-from .tasks import suite
+from .tasks import legacy_suite as suite
 
 
 def apply(directory):

@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 from evalkit.grading import execute, grade
 from evalkit.run import command, environment, invoke, parse_result, version_line
-from evalkit.tasks import LEDGER_REF, PAGE_REF, merge, oracle, ref, suite
+from evalkit.tasks import LEDGER_REF, PAGE_REF, merge, oracle, ref, legacy_suite as suite
+from evalkit.tasks import suite as general_suite
 from evalkit.report import render, prepare, scorecard
 from evalkit.adapters import Variant, codex_command, parse_codex
 from evalkit.regrade import apply as adjudicate
@@ -242,7 +243,7 @@ print(json.dumps({'type':'result','subtype':'success','finalText':sys.stdin.read
     def test_resume_never_repeats_a_recorded_model_call(self):
         with tempfile.TemporaryDirectory() as directory:
             p=Path(directory)
-            answers={t.prompt:json.dumps(t.expected) for t in suite(1)[3:5]}
+            answers={t.prompt:json.dumps(t.expected) for t in general_suite(1)[3:5]}
             (p/"answers.json").write_text(json.dumps(answers))
             fake=p/"codex"
             fake.write_text('''#!/usr/bin/env python3
@@ -259,7 +260,7 @@ print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tok
             fake.chmod(0o700)
             env=dict(os.environ,PATH=str(p)+os.pathsep+os.environ['PATH'],FAKE_ROOT=str(p))
             base=[os.sys.executable,'-m','evalkit.run','--harness','codex','--models','fake-model',
-                  '--tasks','security-triage','evidence-reconciliation','--seed','1','--execute']
+                  '--tasks','expense-reconciliation','browser-snapshots','--seed','1','--execute']
             output=p/'run'
             first=subprocess.run(base+['--output',str(output)],capture_output=True,text=True,env=env)
             self.assertEqual(first.returncode,0,first.stderr)

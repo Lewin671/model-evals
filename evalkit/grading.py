@@ -57,6 +57,11 @@ def grade(task, text):
         if not isinstance(answer, dict): raise ValueError("expected an object")
     except (ValueError, TypeError) as e:
         return {"score":0.0,"status":"format_error","detail":str(e)}
+    if task.rubric:
+        from .rubrics import structured
+        try: return structured(task,answer)
+        except (ValueError,TypeError,KeyError):
+            return {"score":0.0,"status":"format_error","detail":"malformed structured answer"}
     if task.cases is None:
         # Lists are intentionally ordered in every response schema.
         ok = json.dumps(answer,sort_keys=True) == json.dumps(task.expected,sort_keys=True)

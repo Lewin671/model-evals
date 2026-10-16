@@ -10,10 +10,12 @@ import re
 USAGE_FIELDS=("inputTokens","outputTokens","cacheReadTokens","cacheWriteTokens","reasoningTokens")
 ROW_FIELDS=("model","harness","effort","variant","task","dimension","status","score","passed","total",
             "exit_code","prompt_sha256","observed_models","observed_efforts","identity_source",
-            "score_before_adjudication","adjudication")
+            "score_before_adjudication","adjudication","domain","case_results","field_results",
+            "selected_priority","optimal_priority","feasible")
 MANIFEST_FIELDS=("seed","suite","suite_fingerprint","variants","models","tasks","cli_versions","cli_version",
                  "git_commit","adapter_commits","acquisition_notes","grading_fingerprint","ground_truth_revision",
-                 "adjudication_commit","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools")
+                 "adjudication_commit","zdr_enforced","max_turns","timeout_seconds","reasoning_effort","tools",
+                 "task_domains","domain_weights","scope")
 START="<!-- RESULTS:START -->"
 END="<!-- RESULTS:END -->"
 
@@ -30,7 +32,7 @@ def prepare(directories):
     for directory in directories:
         manifest=json.loads((directory/"manifest.json").read_text())
         if manifests:
-            for key in ("seed","suite","suite_fingerprint","grading_fingerprint","ground_truth_revision","tasks"):
+            for key in ("seed","suite","suite_fingerprint","grading_fingerprint","ground_truth_revision","tasks","task_domains","domain_weights"):
                 if manifest.get(key)!=manifests[0].get(key):
                     raise ValueError("cannot combine runs with different "+key)
         manifests.append({k:manifest[k] for k in MANIFEST_FIELDS if k in manifest})
@@ -63,8 +65,16 @@ def prepare(directories):
         task_ids=[r["task"] for r in graded]
         complete=len(task_ids)==len(manifests[0]["tasks"]) and set(task_ids)==set(manifests[0]["tasks"])
         usage={k:sum(r["usage"].get(k,0) for r in subset) for k in USAGE_FIELDS if any(k in r["usage"] for r in subset)}
+        domain_scores={}
+        mapping=manifests[0].get("task_domains",{})
+        if complete and mapping:
+            for domain in manifests[0]["domain_weights"]:
+                values=[r["score"] for r in graded if mapping[r["task"]]==domain]
+                domain_scores[domain]=sum(values)/len(values)
+            overall=sum(domain_scores[d]*w for d,w in manifests[0]["domain_weights"].items())
+        else: overall=sum(r["score"] for r in graded)/len(graded) if complete else None
         aggregates.append({"variant":key,"model":v["model"],"harness":v["harness"],"effort":v["effort"],
-            "score":sum(r["score"] for r in graded)/len(graded) if complete else None,
+            "score":overall,"domain_scores":domain_scores,
             "graded":len(graded),"tasks":len(manifests[0]["tasks"]),"usage":usage,
             "format_failures":sum(r["status"]=="format_error" for r in subset),
             "full_passes":sum(r.get("score")==1 for r in graded)})
@@ -77,6 +87,19 @@ def percent(value):
 
 def source_label(harness):
     return {"codex":"Codex","command-code":"Command Code"}.get(harness,harness)
+
+
+DOMAIN_LABELS={"coding":"Coding","everyday":"Everyday","browser":"Browser (sim.)","computer":"Desktop (sim.)"}
+
+
+def domain_table(data):
+    domains=list(data["runs"][0].get("domain_weights",{}))
+    if not domains: return ""
+    lines=["| Model | Effort | "+" | ".join(DOMAIN_LABELS[d] for d in domains)+" |",
+           "|:--|:--|"+"--:|"*len(domains)]
+    for a in data["aggregates"]:
+        lines.append(f"| `{a['model']}` | {a['effort']} | "+" | ".join(percent(a["domain_scores"].get(d)) for d in domains)+" |")
+    return "\n".join(lines)
 
 
 def leaderboard(data):
@@ -93,13 +116,18 @@ def leaderboard(data):
 
 def markdown(data):
     first=data["runs"][0]
+    weighting="Each domain has equal weight; tasks are averaged within a domain." if first.get("domain_weights") else "Equal task weights."
     lines=["# Model evaluation results", "",f"**Suite:** `{first.get('suite','micro-v1')}` · **Seed:** `{first['seed']}` · **Attempts:** 1 per task/configuration", "",
-           leaderboard(data), "", "Equal task weights. A missing or failed infrastructure run receives no aggregate score.",
+           leaderboard(data), "", weighting+" A missing or failed infrastructure run receives no aggregate score.",
            "Token accounting is CLI-reported; cache and reasoning counters differ between providers. No dollar costs are inferred.",
            "", "## Task breakdown", "", "| Model | Effort | Source | Task | Score | Checks | Status |", "|:--|:--|:--|:--|--:|--:|:--|"]
     if first.get("ground_truth_revision"):
         note="**Ground truth correction:** tenant-isolation classification in security triage was corrected for every saved answer, without new model calls. [Adjudication and original scores](../../docs/adjudications/001-security-triage.md)."
         lines[4:4]=[note, ""]
+    if first.get("domain_weights"):
+        index=lines.index("## Task breakdown")
+        lines[index:index]=["## Domain breakdown", "",domain_table(data),"",
+            "Browser/desktop results measure independent structured-state decisions, not real browsing, visual perception, or interactive tool execution.",""]
     for r in data["results"]:
         checks=f"{r['passed']}/{r['total']}" if "passed" in r else "—"
         lines.append(f"| `{r['model']}` | {r['effort']} | {source_label(r['harness'])} | {r['task']} | {percent(r.get('score'))} | {checks} | {r['status']} |")
@@ -125,7 +153,10 @@ def markdown(data):
 
 
 def scorecard(data):
-    tasks=data["runs"][0]["tasks"]
+    domains=list(data["runs"][0].get("domain_weights",{}))
+    tasks=domains or data["runs"][0]["tasks"]
+    spacing=132 if domains else 92
+    cell_width=120 if domains else 80
     aggregates=sorted(data["aggregates"],key=lambda r:-(r["score"] if r["score"] is not None else -1))
     width=1080
     height=155+len(aggregates)*74
@@ -135,11 +166,12 @@ def scorecard(data):
          f'<rect width="{width}" height="{height}" rx="16" fill="#10151d"/>',
          '<g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" fill="#e8edf5">',
          '<text x="28" y="38" font-size="20" font-weight="600">MODEL EVALS</text>',
-         '<text x="28" y="64" fill="#9ba8ba" font-size="13">micro-v1 · one attempt · equal task weights · higher is better</text>']
+         f'<text x="28" y="64" fill="#9ba8ba" font-size="13">{escape(data["runs"][0].get("suite","micro-v1"))} · one attempt · {"equal domain weights" if domains else "equal task weights"} · higher is better</text>']
     labels={"config-merge":"Merge","reservation-ledger":"State","snapshot-pagination":"Repair",
             "security-triage":"Security","evidence-reconciliation":"Evidence","release-selection":"Planning"}
     for j,t in enumerate(tasks):
-        svg.append(f'<text x="{421+j*92}" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">{escape(labels.get(t,t))}</text>')
+        label=DOMAIN_LABELS[t] if domains else labels.get(t,t)
+        svg.append(f'<text x="{381+cell_width/2+j*spacing}" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">{escape(label)}</text>')
     svg.append('<text x="1008" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Overall</text>')
     for i,a in enumerate(aggregates):
         y=122+i*74
@@ -147,14 +179,16 @@ def scorecard(data):
                 f'<text x="28" y="{y+43}" font-size="12" fill="#9ba8ba">{escape(a["effort"])} effort · {escape(source_label(a["harness"]))}</text>']
         for j,t in enumerate(tasks):
             row=next((r for r in data["results"] if r["variant"]==a["variant"] and r["task"]==t),{})
-            val=row.get("score")
+            val=a["domain_scores"].get(t) if domains else row.get("score")
             color="#243040" if val is None else ("#155b4d" if val==1 else "#704b23" if val>0 else "#713742")
-            x=381+j*92
-            svg += [f'<rect x="{x}" y="{y}" width="80" height="49" rx="7" fill="{color}"/>',
-                    f'<text x="{x+40}" y="{y+30}" text-anchor="middle" font-size="14">{percent(val)}</text>']
+            x=381+j*spacing
+            svg += [f'<rect x="{x}" y="{y}" width="{cell_width}" height="49" rx="7" fill="{color}"/>',
+                    f'<text x="{x+cell_width/2}" y="{y+30}" text-anchor="middle" font-size="14">{percent(val)}</text>']
         svg.append(f'<text x="1008" y="{y+31}" text-anchor="middle" font-size="18" font-weight="600">{percent(a["score"])}</text>')
     if data["runs"][0].get("ground_truth_revision"):
         svg.append(f'<text x="28" y="{height-12}" fill="#9ba8ba" font-size="11">Security ground truth corrected uniformly; see Adjudication 001. Small sample; no general ranking.</text>')
+    elif domains:
+        svg.append(f'<text x="28" y="{height-12}" fill="#9ba8ba" font-size="11">Browser/desktop: structured snapshot reasoning only. No real tool use or visual perception measured.</text>')
     return "\n".join(svg+["</g></svg>"])
 
 

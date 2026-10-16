@@ -14,6 +14,8 @@ class Task:
     expected: object = None
     cases: object = None
     reference: str = ""
+    domain: str = ""
+    rubric: object = None
 
 
 def merge(layers):
@@ -122,7 +124,7 @@ def oracle(task_id, arg):
             "holds":{k:v[0] for k,v in reservations.items()}}
 
 
-def suite(seed):
+def legacy_suite(seed):
     rng = random.Random(seed)
     prefix = "No tools, files, web, or external knowledge are needed. Answer ONLY one JSON object, no Markdown. "
     code = prefix + 'Return {"source":"complete Python 3 code defining solve(arg)"}. Standard library only. Do not mutate arg. '
@@ -226,3 +228,9 @@ def suite(seed):
         "Data: " + json.dumps({"jobs":jobs,"conflicts":conflicts,"budget":budget}),
         {"selected":best[2],"value":-best[0],"cost":best[1]}))
     return tasks
+
+
+def suite(seed):
+    """Current public suite. Legacy tasks remain for archived result inspection."""
+    from .general import build
+    return build(seed)

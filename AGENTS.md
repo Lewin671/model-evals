@@ -11,3 +11,9 @@ Present this as model capability evaluation; Command Code and Codex are harnesse
 Every comparison must include model ID, harness, explicit reasoning effort and
 whether identity/effort were observed or only configured. Publish measured results
 with per-task evidence; never put illustrative scores in a real leaderboard.
+
+The current scope is general coding, everyday tasks, browser workflow reasoning and
+desktop workflow reasoning. Do not include security in new model campaigns. Keep
+legacy results archived. Give each of the four domains equal aggregate weight.
+Label structured UI snapshots as simulation: they do not establish visual perception,
+actual tool execution, or closed-loop recovery. Accept equivalent valid actions and plans.
