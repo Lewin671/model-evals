@@ -24,14 +24,18 @@ its code against hidden inputs, and keep the cost low enough to rerun deliberate
 
 <!-- RESULTS:START -->
 
-The first measured comparison is being prepared. No illustrative or estimated scores are shown.
+| Model | Reasoning effort | Source | Score | Full passes | Input / output tokens |
+|:--|:--|:--|--:|--:|--:|
+| `gpt-6.1-sol` | `high` | Codex | **100.0%** | 6/6 | 73,486 / 1,797 |
+| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | **83.3%** | 5/6 | 82,457 / 6,069 |
+| `z-ai/glm-5.3-flash` | `high` | Command Code | **82.6%** | 4/6 | 101,812 / 3,074 |
+| `gpt-6-luna` | `high` | Codex | **82.6%** | 4/6 | 69,314 / 2,121 |
 
-| Model | Reasoning effort | Source | Status |
-|:--|:--|:--|:--|
-| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | Not run |
-| `z-ai/glm-5.3-flash` | `high` | Command Code | Not run |
-| `gpt-6.1-sol` | `high` | Codex | Not run |
-| `gpt-6-luna` | `high` | Codex | Not run |
+![Per-task scorecard](results/2026-10-15-micro-v1/scorecard.svg)
+
+[Full results](results/2026-10-15-micro-v1/report.md) · [Machine-readable data](results/2026-10-15-micro-v1/summary.json) · [Model responses](results/2026-10-15-micro-v1/responses.md)
+
+One attempt per task; screening results, not a general model ranking.
 
 <!-- RESULTS:END -->
 
@@ -41,6 +45,11 @@ Different harnesses also affect prompts and execution behavior. [Evaluation limi
 
 The first campaign includes a documented [security-oracle correction](docs/adjudications/001-security-triage.md).
 It applies to every saved answer, without additional model calls; original scores remain available for audit.
+
+**What separated this run:** Sol caught a missing tenant filter that the other three missed.
+DeepSeek and Sol also handled the Boolean-versus-integer deletion marker correctly; GLM and Luna
+missed that boundary. All four passed the evaluated ledger, pagination, evidence and planning checks.
+[Read the findings and concrete counterexample →](results/2026-10-15-micro-v1/findings.md)
 
 ## The evaluation set
 

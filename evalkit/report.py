@@ -75,6 +75,10 @@ def percent(value):
     return "—" if value is None else f"{100*value:.1f}%"
 
 
+def source_label(harness):
+    return {"codex":"Codex","command-code":"Command Code"}.get(harness,harness)
+
+
 def leaderboard(data):
     lines=["| Model | Reasoning effort | Source | Score | Full passes | Input / output tokens |",
            "|:--|:--|:--|--:|--:|--:|"]
@@ -83,7 +87,7 @@ def leaderboard(data):
         u=a["usage"]
         tokens=f"{u['inputTokens']:,} / {u['outputTokens']:,}" if {"inputTokens","outputTokens"}<=u.keys() else "—"
         coverage=f"{a['full_passes']}/{a['tasks']}" if a["score"] is not None else f"incomplete ({a['graded']}/{a['tasks']})"
-        lines.append(f"| `{a['model']}` | `{a['effort']}` | {a['harness']} | **{percent(a['score'])}** | {coverage} | {tokens} |")
+        lines.append(f"| `{a['model']}` | `{a['effort']}` | {source_label(a['harness'])} | **{percent(a['score'])}** | {coverage} | {tokens} |")
     return "\n".join(lines)
 
 
@@ -98,7 +102,7 @@ def markdown(data):
         lines[4:4]=[note, ""]
     for r in data["results"]:
         checks=f"{r['passed']}/{r['total']}" if "passed" in r else "—"
-        lines.append(f"| `{r['model']}` | {r['effort']} | {r['harness']} | {r['task']} | {percent(r.get('score'))} | {checks} | {r['status']} |")
+        lines.append(f"| `{r['model']}` | {r['effort']} | {source_label(r['harness'])} | {r['task']} | {percent(r.get('score'))} | {checks} | {r['status']} |")
     lines += ["", "## Reproducibility", "", "| Run | Commit | CLI versions |", "|:--|:--|:--|"]
     for i,m in enumerate(data["runs"],1):
         versions=m.get("cli_versions",{"cmd":m.get("cli_version","unknown")})
@@ -122,7 +126,7 @@ def markdown(data):
 
 def scorecard(data):
     tasks=data["runs"][0]["tasks"]
-    aggregates=data["aggregates"]
+    aggregates=sorted(data["aggregates"],key=lambda r:-(r["score"] if r["score"] is not None else -1))
     width=1080
     height=155+len(aggregates)*74
     svg=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
@@ -140,7 +144,7 @@ def scorecard(data):
     for i,a in enumerate(aggregates):
         y=122+i*74
         svg += [f'<text x="28" y="{y+21}" font-size="14" font-weight="600">{escape(a["model"])}</text>',
-                f'<text x="28" y="{y+43}" font-size="12" fill="#9ba8ba">{escape(a["effort"])} effort · {escape(a["harness"])}</text>']
+                f'<text x="28" y="{y+43}" font-size="12" fill="#9ba8ba">{escape(a["effort"])} effort · {escape(source_label(a["harness"]))}</text>']
         for j,t in enumerate(tasks):
             row=next((r for r in data["results"] if r["variant"]==a["variant"] and r["task"]==t),{})
             val=row.get("score")
@@ -149,6 +153,8 @@ def scorecard(data):
             svg += [f'<rect x="{x}" y="{y}" width="80" height="49" rx="7" fill="{color}"/>',
                     f'<text x="{x+40}" y="{y+30}" text-anchor="middle" font-size="14">{percent(val)}</text>']
         svg.append(f'<text x="1008" y="{y+31}" text-anchor="middle" font-size="18" font-weight="600">{percent(a["score"])}</text>')
+    if data["runs"][0].get("ground_truth_revision"):
+        svg.append(f'<text x="28" y="{height-12}" fill="#9ba8ba" font-size="11">Security ground truth corrected uniformly; see Adjudication 001. Small sample; no general ranking.</text>')
     return "\n".join(svg+["</g></svg>"])
 
 
