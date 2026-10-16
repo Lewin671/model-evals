@@ -26,7 +26,24 @@ Those runs remain available as prototype records, but their score tables and cha
 been removed from the main comparison. Repeating the same easy templates would not fix
 the ceiling effect. The first replacement is an implemented [incremental-importer coding
 workflow](docs/importer-calibration.md), with reference traces and local qualification
-gates. Its first small pilot is pending. The other three workflow families remain specifications.
+gates. Its first valid episode passes **11/11** checks (DeepSeek v4.1 Flash, **low**, three requests).
+The pilot stopped at its output-token guard before paired GLM runs; this is **incomplete evidence**,
+not a model comparison. The other three workflow families remain specifications.
+
+[Inspect the measured result, source artifacts and tool trace →](results/importer-native-calibration-01/report.md)
+
+## Replacement workflow evidence
+
+| Model | Harness | Reasoning effort | Importer result | Coverage |
+|:--|:--|:--|:--|:--|
+| DeepSeek v4.1 Flash | Command Code | low, observed | **11/11** | One starter; 3 requests |
+| GLM 5.3 Flash | Command Code | low, planned | Not run | Budget guard stopped pilot |
+| gpt-6.1-sol | Codex | Not yet selected for replacement run | Not run | Archived prototype only |
+| gpt-6-luna | Codex | Not yet selected for replacement run | Not run | Archived prototype only |
+
+The first valid episode reported 12,047 output tokens. Including invalid adapter attempts,
+reported output reached 33,805; one interrupted request has unknown usage. The 32,000
+soft guard stops between turns and can overshoot. Adapter failures are excluded from scores.
 
 ## Prototype records
 
@@ -37,8 +54,7 @@ gates. Its first small pilot is pending. The other three workflow families remai
 | general-v2 | Pipeline checks worked; task difficulty did not establish useful model separation | [Findings](results/general-v2-screening-01/findings.md) · [Raw responses](results/general-v2-screening-01/responses.md) · [Full record](results/general-v2-screening-01/report.md) |
 | micro-v1 | Earlier, different-scope screen with a documented oracle correction | [Archived record](results/2026-10-15-micro-v1/report.md) |
 
-These are development artifacts, not leaderboards. No additional model calls were made
-for the challenge redesign.
+These are development artifacts, not leaderboards. The replacement coding pilot is reported separately above.
 
 <!-- RESULTS:END -->
 
@@ -59,7 +75,7 @@ buttons to press is not.
 
 The coding runner now supports repository reads/edits, public test feedback and a
 mid-episode requirement change. Hidden checks execute the final files. It has no real
-shell/network tool and uses a controlled file-action protocol through Command Code.
+shell/network tool and uses three native repository tools through Command Code.
 [Implementation, acceptance checks and bounded pilot →](docs/importer-calibration.md)
 
 The browser/desktop track can use local deterministic simulators; no real accounts or

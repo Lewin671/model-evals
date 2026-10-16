@@ -1,0 +1,516 @@
+[
+  {
+    "round": 1,
+    "action": {
+      "tool": "read",
+      "paths": [
+        "README.md",
+        "ledger/__init__.py",
+        "ledger/parser.py",
+        "ledger/store.py",
+        "ledger/api.py"
+      ]
+    },
+    "result": {
+      "tool": "read",
+      "files": {
+        "README.md": "# Stream Ledger\n\nRepair/complete the implementation while preserving its public API. Use only Python's\nstandard library. You can change ledger/parser.py, ledger/store.py and ledger/api.py.\n\n## API and behavior\n\n- Ingestor(database_path) opens or creates a persistent database. One active writer only.\n- feed(stream_id, delivery_id, text, final=False) appends a Unicode CSV fragment and\n  returns the number of accepted record revisions, including tombstones. Each pair of\n  stream_id/delivery_id identifies one delivery; exact retries return 0 and change nothing.\n- Fragments may split anywhere, including quotes, headers and CRLF. Multiple streams\n  may be interleaved. Each stream has its own header, pending fragment and delivery IDs.\n- CSV has these named columns in any order: id, revision, category, amount_cents, note, op.\n  Quoted newlines, escaped quotes, commas and Unicode are valid. Empty physical lines\n  are ignored; an empty import or header-only import is valid.\n- Commit complete logical records ending in LF or CRLF. final=True also commits a final\n  complete record without a newline. An incomplete quoted record at final=True is invalid.\n- revision is a positive integer; id is nonempty; op is upsert or delete. Upserts require\n  integer amount_cents and preserve category/note. Negative amounts are valid credits.\n  Delete rows may leave category/amount/note empty.\n- Highest revision wins globally by record ID, independent of arrival order or stream.\n  Equal/older revisions are ignored. Deleted IDs retain their revision so older upserts\n  cannot resurrect them. A later, higher revision may restore an ID.\n- A feed is atomic: invalid complete rows raise ValueError without changing records,\n  pending text, delivery bookkeeping or headers, including the in-memory instance.\n  A corrected retry of a failed delivery ID must still work.\n- Restarting Ingestor must preserve committed records, tombstones, pending text and replay\n  bookkeeping. No feed after a stream's final delivery is required, except replay retries.\n- records() returns live records sorted lexicographically by ID, with exactly the fields\n  id, revision (int), category, amount_cents (int), note. Deleted records are excluded.\n- summary() returns {\"total_cents\": int, \"by_category\": {category: int}} from live records.\n  Keep zero-valued categories if live records remain; remove categories with no live records.\n  Repeated summary calls must reflect successful feeds and ignore failed/ignored ones.\n- import_csv(database_path, text) remains supported: import a complete CSV document and\n  return its summary. Multiple independent files (each with a header) may use one database;\n  importing an identical document again is harmless.\n\n## Evaluation tools\nUse the native repo_read, repo_write and repo_test tools to inspect, edit and verify the\nrepository. These are the only repository tools. Do not use shell, web, subagents or the\nordinary filesystem tools. Your final response can be ordinary Markdown; no JSON answer\nenvelope is required. Runnable source files are graded, not your explanation.\n\nModel-request budget: 3. Batch source reads, source replacements and tests when useful. Final prose is optional; completed files are the goal.\n",
+        "ledger/__init__.py": "from .api import Ingestor, import_csv\n",
+        "ledger/parser.py": "import csv\nimport io\n\ndef decode(pending, header, text, final=False):\n    data = pending + text\n    cut = len(data) if final else data.rfind('\\n') + 1\n    lines = data[:cut].splitlines()\n    rows = []\n    for line in lines:\n        values = next(csv.reader([line]))\n        if not values:\n            continue\n        if header is None:\n            header = values\n        elif len(values) != len(header):\n            raise ValueError('invalid field count')\n        else:\n            rows.append(dict(zip(header, values)))\n    return data[cut:], header, rows\n",
+        "ledger/store.py": "import json\nimport os\nimport tempfile\nfrom pathlib import Path\n\nclass Store:\n    def __init__(self, path):\n        self.path = Path(path)\n    def load(self):\n        if self.path.exists():\n            return json.loads(self.path.read_text())\n        return {'streams': {}, 'records': {}}\n    def save(self, data):\n        with tempfile.NamedTemporaryFile('w', dir=self.path.parent, delete=False) as f:\n            json.dump(data, f)\n            name = f.name\n        os.replace(name, self.path)\n    def apply(self, data, row):\n        key = row['id']\n        revision = int(row['revision'])\n        if not key or revision <= 0 or row['op'] not in ('upsert', 'delete'):\n            raise ValueError('invalid record')\n        amount = int(row['amount_cents']) if row['op'] == 'upsert' else 0\n        previous = data['records'].get(key)\n        if previous and revision == previous['revision']:\n            return False\n        data['records'][key] = {'id': key, 'revision': revision, 'category': row['category'],\n            'amount_cents': amount, 'note': row['note'], 'deleted': row['op'] == 'delete'}\n        return True\n",
+        "ledger/api.py": "import hashlib\nfrom .parser import decode\nfrom .store import Store\n\nclass Ingestor:\n    def __init__(self, database_path):\n        self.store = Store(database_path)\n        self.data = self.store.load()\n        self.cache = None\n    def feed(self, stream_id, delivery_id, text, final=False):\n        stream = self.data['streams'].setdefault(stream_id, {'pending': '', 'header': None, 'deliveries': []})\n        if delivery_id in stream['deliveries']:\n            return 0\n        pending, header, rows = decode(stream['pending'], stream['header'], text, final)\n        accepted = 0\n        for row in rows:\n            accepted += self.store.apply(self.data, row)\n            self.store.save(self.data)\n        stream.update(pending=pending, header=header)\n        stream['deliveries'].append(delivery_id)\n        self.store.save(self.data)\n        return accepted\n    def records(self):\n        return [{k: row[k] for k in ('id','revision','category','amount_cents','note')}\n                for key, row in sorted(self.data['records'].items()) if not row['deleted']]\n    def summary(self):\n        if self.cache is None:\n            groups = {}\n            for row in self.records():\n                groups[row['category']] = groups.get(row['category'], 0) + row['amount_cents']\n            self.cache = {'total_cents': sum(groups.values()), 'by_category': groups}\n        return self.cache\n\ndef import_csv(database_path, text):\n    obj = Ingestor(database_path)\n    obj.feed('file-' + hashlib.sha256(text.encode()).hexdigest(), 'all', text, True)\n    return obj.summary()\n"
+      }
+    }
+  },
+  {
+    "round": 2,
+    "action": {
+      "tool": "test"
+    },
+    "result": {
+      "tool": "test",
+      "public_checks": {
+        "passed": 1,
+        "total": 3,
+        "fraction": 0.3333333333333333,
+        "tiers": {
+          "L1": {
+            "passed": 1,
+            "total": 2
+          },
+          "L3": {
+            "passed": 0,
+            "total": 1
+          }
+        },
+        "cases": [
+          {
+            "passed": true,
+            "reason": "verified API outputs",
+            "observed": {
+              "events": [
+                {
+                  "result": {
+                    "total_cents": 200,
+                    "by_category": {
+                      "work": 200
+                    }
+                  },
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 1,
+                        "category": "work",
+                        "amount_cents": 200,
+                        "note": ""
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 200,
+                      "by_category": {
+                        "work": 200
+                      }
+                    }
+                  }
+                },
+                {
+                  "result": {
+                    "total_cents": -250,
+                    "by_category": {
+                      "new": -250
+                    }
+                  },
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 3,
+                        "category": "new",
+                        "amount_cents": -250,
+                        "note": "correction"
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": -250,
+                      "by_category": {
+                        "new": -250
+                      }
+                    }
+                  }
+                },
+                {
+                  "result": {
+                    "total_cents": -250,
+                    "by_category": {
+                      "new": -250
+                    }
+                  },
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 3,
+                        "category": "new",
+                        "amount_cents": -250,
+                        "note": "correction"
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": -250,
+                      "by_category": {
+                        "new": -250
+                      }
+                    }
+                  }
+                }
+              ],
+              "state": {
+                "records": [
+                  {
+                    "id": "sample-823",
+                    "revision": 3,
+                    "category": "new",
+                    "amount_cents": -250,
+                    "note": "correction"
+                  }
+                ],
+                "summary": {
+                  "total_cents": -250,
+                  "by_category": {
+                    "new": -250
+                  }
+                }
+              }
+            },
+            "name": "legacy-files",
+            "tier": 1,
+            "test_fixture": {
+              "ops": [
+                {
+                  "op": "legacy",
+                  "text": "id,revision,category,amount_cents,note,op\nsample-823,1,work,200,,upsert\n"
+                },
+                {
+                  "op": "legacy",
+                  "text": "op,note,amount_cents,category,revision,id\nupsert,correction,-250,new,3,sample-823\n"
+                },
+                {
+                  "op": "legacy",
+                  "text": "op,note,amount_cents,category,revision,id\nupsert,correction,-250,new,3,sample-823\n"
+                }
+              ],
+              "expected": {
+                "records": [
+                  {
+                    "id": "sample-823",
+                    "revision": 3,
+                    "category": "new",
+                    "amount_cents": -250,
+                    "note": "correction"
+                  }
+                ],
+                "summary": {
+                  "total_cents": -250,
+                  "by_category": {
+                    "new": -250
+                  }
+                }
+              },
+              "accepted": {},
+              "error_indices": [],
+              "snapshots": {}
+            }
+          },
+          {
+            "passed": false,
+            "reason": "incorrect final records/report",
+            "observed": {
+              "events": [
+                {
+                  "result": 0,
+                  "state": {
+                    "records": [],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": null,
+                  "state": {
+                    "records": [],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": 1,
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 1,
+                        "category": "work",
+                        "amount_cents": 200,
+                        "note": ""
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                }
+              ],
+              "state": {
+                "records": [
+                  {
+                    "id": "sample-823",
+                    "revision": 1,
+                    "category": "work",
+                    "amount_cents": 200,
+                    "note": ""
+                  }
+                ],
+                "summary": {
+                  "total_cents": 0,
+                  "by_category": {}
+                }
+              }
+            },
+            "name": "fragmented-records",
+            "tier": 1,
+            "test_fixture": {
+              "ops": [
+                {
+                  "op": "feed",
+                  "stream": "s",
+                  "delivery": "a",
+                  "text": "id,revisi",
+                  "final": false
+                },
+                {
+                  "op": "restart"
+                },
+                {
+                  "op": "feed",
+                  "stream": "s",
+                  "delivery": "b",
+                  "text": "on,category,amount_cents,note,op\nsample-823,1,work,200,,upsert\n",
+                  "final": true
+                }
+              ],
+              "expected": {
+                "records": [
+                  {
+                    "id": "sample-823",
+                    "revision": 1,
+                    "category": "work",
+                    "amount_cents": 200,
+                    "note": ""
+                  }
+                ],
+                "summary": {
+                  "total_cents": 200,
+                  "by_category": {
+                    "work": 200
+                  }
+                }
+              },
+              "accepted": {
+                "0": 0,
+                "2": 1
+              },
+              "error_indices": [],
+              "snapshots": {}
+            }
+          },
+          {
+            "passed": false,
+            "reason": "operation 2: incorrect intermediate records/report",
+            "observed": {
+              "events": [
+                {
+                  "result": null,
+                  "state": {
+                    "records": [],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": 1,
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 1,
+                        "category": "work",
+                        "amount_cents": 200,
+                        "note": ""
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": null,
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 1,
+                        "category": "work",
+                        "amount_cents": 200,
+                        "note": ""
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": 1,
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 3,
+                        "category": "new",
+                        "amount_cents": -250,
+                        "note": "correction"
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": 1,
+                  "state": {
+                    "records": [],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": null,
+                  "state": {
+                    "records": [],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                },
+                {
+                  "result": 1,
+                  "state": {
+                    "records": [
+                      {
+                        "id": "sample-823",
+                        "revision": 2,
+                        "category": "wrong",
+                        "amount_cents": 9999,
+                        "note": ""
+                      }
+                    ],
+                    "summary": {
+                      "total_cents": 0,
+                      "by_category": {}
+                    }
+                  }
+                }
+              ],
+              "state": {
+                "records": [
+                  {
+                    "id": "sample-823",
+                    "revision": 2,
+                    "category": "wrong",
+                    "amount_cents": 9999,
+                    "note": ""
+                  }
+                ],
+                "summary": {
+                  "total_cents": 0,
+                  "by_category": {}
+                }
+              }
+            },
+            "name": "revisions-and-delete",
+            "tier": 3,
+            "test_fixture": {
+              "ops": [
+                {
+                  "op": "snapshot"
+                },
+                {
+                  "op": "feed",
+                  "stream": "one",
+                  "delivery": "d",
+                  "text": "id,revision,category,amount_cents,note,op\nsample-823,1,work,200,,upsert\n",
+                  "final": true
+                },
+                {
+                  "op": "snapshot"
+                },
+                {
+                  "op": "feed",
+                  "stream": "two",
+                  "delivery": "d",
+                  "text": "op,note,amount_cents,category,revision,id\nupsert,correction,-250,new,3,sample-823\n",
+                  "final": true
+                },
+                {
+                  "op": "feed",
+                  "stream": "three",
+                  "delivery": "d",
+                  "text": "id,revision,category,amount_cents,note,op\nsample-823,4,,,,delete\n",
+                  "final": true
+                },
+                {
+                  "op": "restart"
+                },
+                {
+                  "op": "feed",
+                  "stream": "four",
+                  "delivery": "d",
+                  "text": "id,revision,category,amount_cents,note,op\nsample-823,2,wrong,9999,,upsert\n",
+                  "final": true
+                }
+              ],
+              "expected": {
+                "records": [],
+                "summary": {
+                  "total_cents": 0,
+                  "by_category": {}
+                }
+              },
+              "accepted": {
+                "1": 1,
+                "3": 1,
+                "4": 1,
+                "6": 0
+              },
+              "error_indices": [],
+              "snapshots": {
+                "2": {
+                  "records": [
+                    {
+                      "id": "sample-823",
+                      "revision": 1,
+                      "category": "work",
+                      "amount_cents": 200,
+                      "note": ""
+                    }
+                  ],
+                  "summary": {
+                    "total_cents": 200,
+                    "by_category": {
+                      "work": 200
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "round": 3,
+    "action": {
+      "tool": "write",
+      "files": {
+        "ledger/parser.py": "import csv\nimport io\n\n\ndef _boundary(data, final):\n    n = len(data)\n    last = 0\n    in_quotes = False\n    field_start = True\n    i = 0\n    while i < n:\n        ch = data[i]\n        if in_quotes:\n            if ch == '\"':\n                if i + 1 < n and data[i + 1] == '\"':\n                    i += 2\n                    continue\n                in_quotes = False\n            i += 1\n            continue\n        if ch == '\"' and field_start:\n            in_quotes = True\n            field_start = False\n            i += 1\n            continue\n        if ch == '\\n':\n            i += 1\n            last = i\n            field_start = True\n            continue\n        field_start = ch == ','\n        i += 1\n    if final:\n        if in_quotes:\n            raise ValueError('unterminated quoted record')\n        return n\n    return last\n\n\ndef decode(pending, header, text, final=False):\n    data = pending + text\n    cut = _boundary(data, final)\n    chunk = data[:cut]\n    rest = data[cut:]\n    rows = []\n    for values in csv.reader(io.StringIO(chunk)):\n        if not values:\n            continue\n        if header is None:\n            header = values\n        elif len(values) != len(header):\n            raise ValueError('invalid field count')\n        else:\n            rows.append(dict(zip(header, values)))\n    return rest, header, rows\n",
+        "ledger/store.py": "import json\nimport os\nimport tempfile\nfrom pathlib import Path\n\n\nclass Store:\n    def __init__(self, path):\n        self.path = Path(path)\n\n    def load(self):\n        if self.path.exists():\n            return json.loads(self.path.read_text())\n        return {'streams': {}, 'records': {}}\n\n    def save(self, data):\n        with tempfile.NamedTemporaryFile('w', dir=self.path.parent, delete=False) as f:\n            json.dump(data, f)\n            name = f.name\n        os.replace(name, self.path)\n\n    def apply(self, data, row):\n        key = row.get('id', '')\n        if not key:\n            raise ValueError('invalid id')\n        try:\n            revision = int(row['revision'])\n        except (KeyError, TypeError, ValueError):\n            raise ValueError('invalid revision')\n        if revision <= 0:\n            raise ValueError('invalid revision')\n        op = row.get('op')\n        if op not in ('upsert', 'delete'):\n            raise ValueError('invalid op')\n        if op == 'upsert':\n            try:\n                amount = int(row['amount_cents'])\n            except (KeyError, TypeError, ValueError):\n                raise ValueError('invalid amount')\n        else:\n            amount = 0\n        previous = data['records'].get(key)\n        if previous is not None and revision <= previous['revision']:\n            return False\n        data['records'][key] = {\n            'id': key,\n            'revision': revision,\n            'category': row.get('category', ''),\n            'amount_cents': amount,\n            'note': row.get('note', ''),\n            'deleted': op == 'delete',\n        }\n        return True\n",
+        "ledger/api.py": "import copy\nimport hashlib\n\nfrom .parser import decode\nfrom .store import Store\n\n\nclass Ingestor:\n    def __init__(self, database_path):\n        self.store = Store(database_path)\n        self.data = self.store.load()\n        self.cache = None\n\n    def feed(self, stream_id, delivery_id, text, final=False):\n        stream = self.data['streams'].get(stream_id)\n        if stream is not None:\n            prior = stream.get('deliveries', {}).get(str(delivery_id))\n            if prior is not None:\n                if prior.get('text') == text and bool(prior.get('final')) == bool(final):\n                    return 0\n                raise ValueError('conflicting retry')\n        new = copy.deepcopy(self.data)\n        stream = new['streams'].get(stream_id)\n        if stream is None:\n            stream = {'pending': '', 'header': None, 'deliveries': {}}\n            new['streams'][stream_id] = stream\n        pending, header, rows = decode(stream['pending'], stream['header'], text, final)\n        accepted = 0\n        for row in rows:\n            if self.store.apply(new, row):\n                accepted += 1\n        stream['pending'] = pending\n        stream['header'] = header\n        stream['deliveries'][str(delivery_id)] = {'text': text, 'final': bool(final)}\n        self.data = new\n        self.cache = None\n        self.store.save(self.data)\n        return accepted\n\n    def records(self):\n        return [{k: row[k] for k in ('id', 'revision', 'category', 'amount_cents', 'note')}\n                for _, row in sorted(self.data['records'].items()) if not row['deleted']]\n\n    def summary(self):\n        if self.cache is None:\n            groups = {}\n            for row in self.records():\n                groups[row['category']] = groups.get(row['category'], 0) + row['amount_cents']\n            self.cache = {'total_cents': sum(groups.values()), 'by_category': groups}\n        return self.cache\n\n\ndef import_csv(database_path, text):\n    obj = Ingestor(database_path)\n    obj.feed('file-' + hashlib.sha256(text.encode()).hexdigest(), 'all', text, True)\n    return obj.summary()\n"
+      }
+    },
+    "result": {
+      "tool": "write",
+      "saved": [
+        "ledger/parser.py",
+        "ledger/store.py",
+        "ledger/api.py"
+      ]
+    }
+  }
+]

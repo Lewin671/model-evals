@@ -1,0 +1,119 @@
+[
+  {
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "low",
+    "harness": "Command Code / native repository tools",
+    "variant": "stream",
+    "turn_cap": 3,
+    "exit_code": 0,
+    "usage": {
+      "cliInvocations": 1,
+      "observedModelRequests": 3,
+      "inputTokens": 30955,
+      "outputTokens": 12047,
+      "cacheReadTokens": 18688
+    },
+    "change_delivered": true,
+    "models_observed": [
+      "deepseek/deepseek-v4.1-flash"
+    ],
+    "efforts_observed": [
+      "low"
+    ],
+    "stop": "stop_hook",
+    "tool_calls": [
+      "repo_read",
+      "repo_test",
+      "repo_write"
+    ],
+    "tool_denials": [],
+    "mod_errors": [],
+    "grade": {
+      "passed": 11,
+      "total": 11,
+      "fraction": 1.0,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 5,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    }
+  }
+]

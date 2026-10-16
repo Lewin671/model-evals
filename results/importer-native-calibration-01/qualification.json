@@ -1,0 +1,827 @@
+{
+  "reference": {
+    "stream": {
+      "passed": 11,
+      "total": 11,
+      "fraction": 1.0,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 5,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "state": {
+      "passed": 11,
+      "total": 11,
+      "fraction": 1.0,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 5,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    }
+  },
+  "starter": {
+    "stream": {
+      "passed": 2,
+      "total": 11,
+      "fraction": 0.18181818181818182,
+      "tiers": {
+        "L1": {
+          "passed": 1,
+          "total": 2
+        },
+        "L2": {
+          "passed": 1,
+          "total": 4
+        },
+        "L3": {
+          "passed": 0,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: unexpected ValueError",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 18: unexpected ValueError",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: incorrect intermediate records/report",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "operation 1: incorrect intermediate records/report",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "operation 0: unexpected ValueError",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: expected ValueError",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "state": {
+      "passed": 2,
+      "total": 11,
+      "fraction": 0.18181818181818182,
+      "tiers": {
+        "L1": {
+          "passed": 0,
+          "total": 2
+        },
+        "L2": {
+          "passed": 2,
+          "total": 4
+        },
+        "L3": {
+          "passed": 0,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 1: wrong accepted revision count",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: incorrect intermediate records/report",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "operation 1: incorrect intermediate records/report",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: expected ValueError",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "incorrect final records/report",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    }
+  },
+  "mutants": {
+    "line-splitter": {
+      "passed": 8,
+      "total": 11,
+      "fraction": 0.7272727272727273,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 1,
+          "total": 4
+        },
+        "L3": {
+          "passed": 5,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": false,
+          "reason": "operation 2: unexpected ValueError",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 18: unexpected ValueError",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "operation 0: unexpected ValueError",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "last-arrival": {
+      "passed": 10,
+      "total": 11,
+      "fraction": 0.9090909090909091,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 4,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 6: wrong accepted revision count",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "non-atomic": {
+      "passed": 10,
+      "total": 11,
+      "fraction": 0.9090909090909091,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 4,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": false,
+          "reason": "operation 1: incorrect intermediate records/report",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "text-only-replay": {
+      "passed": 10,
+      "total": 11,
+      "fraction": 0.9090909090909091,
+      "tiers": {
+        "L1": {
+          "passed": 2,
+          "total": 2
+        },
+        "L2": {
+          "passed": 4,
+          "total": 4
+        },
+        "L3": {
+          "passed": 4,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 3: expected ValueError",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    },
+    "no-replay": {
+      "passed": 8,
+      "total": 11,
+      "fraction": 0.7272727272727273,
+      "tiers": {
+        "L1": {
+          "passed": 1,
+          "total": 2
+        },
+        "L2": {
+          "passed": 3,
+          "total": 4
+        },
+        "L3": {
+          "passed": 4,
+          "total": 5
+        }
+      },
+      "cases": [
+        {
+          "passed": false,
+          "reason": "operation 2: unexpected ValueError",
+          "name": "legacy-files",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "fragmented-records",
+          "tier": 1
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "quoted-boundaries",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 6: unexpected ValueError",
+          "name": "partition-replay",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "independent-streams",
+          "tier": 2
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "revisions-and-delete",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-corrected-retry",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "atomic-pending",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "final-without-newline",
+          "tier": 2
+        },
+        {
+          "passed": false,
+          "reason": "operation 4: unexpected ValueError",
+          "name": "conflicting-replay",
+          "tier": 3
+        },
+        {
+          "passed": true,
+          "reason": "verified API outputs",
+          "name": "incomplete-final-rollback",
+          "tier": 3
+        }
+      ]
+    }
+  },
+  "reference_trace": [
+    {
+      "turn": 1,
+      "tools": [
+        "read"
+      ],
+      "change_active": false,
+      "finished": false
+    },
+    {
+      "turn": 2,
+      "tools": [
+        "write",
+        "test"
+      ],
+      "change_active": false,
+      "finished": false
+    },
+    {
+      "turn": 3,
+      "tools": [
+        "write",
+        "test"
+      ],
+      "change_active": true,
+      "finished": false
+    },
+    {
+      "turn": 4,
+      "tools": [
+        "finish"
+      ],
+      "change_active": true,
+      "finished": true
+    }
+  ]
+}

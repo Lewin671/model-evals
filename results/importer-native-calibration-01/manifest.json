@@ -1,0 +1,36 @@
+{
+  "workflow": "incremental-importer-native-v1",
+  "seed": 5787436841354079026,
+  "models": [
+    "deepseek/deepseek-v4.1-flash",
+    "z-ai/glm-5.3-flash"
+  ],
+  "variants": [
+    "stream",
+    "state"
+  ],
+  "effort": "low",
+  "turn_cap_per_episode": 3,
+  "max_observed_requests_including_setup": 24,
+  "output_token_guard_including_setup": 32000,
+  "setup_usage": {
+    "cliInvocations": 4,
+    "observedModelRequests": 9,
+    "inputTokens": 126487,
+    "outputTokens": 21758,
+    "cacheReadTokens": 73856
+  },
+  "fingerprint": "c2e7a713f84e39006c1574549ec7acc3a0085fc7480b3dbaed2a3a2f57f0227f",
+  "preflight": "passed",
+  "zdr_enforced": false,
+  "prior_requests_with_unreported_usage": 1,
+  "cli_version": "1.82.5",
+  "commit": "aa004c6c9436523b8993a9f682a7bedaaf922312",
+  "usage_including_invalid_attempts": {
+    "cliInvocations": 5,
+    "observedModelRequests": 12,
+    "inputTokens": 157442,
+    "outputTokens": 33805,
+    "cacheReadTokens": 92544
+  }
+}
