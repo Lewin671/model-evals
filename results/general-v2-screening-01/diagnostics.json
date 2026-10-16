@@ -1,0 +1,51 @@
+{
+  "kind": "post-hoc content diagnostic; excluded from official scores",
+  "rule": "Unwrap a singleton array containing an object; otherwise inspect the original object. No action edits.",
+  "model_calls": 0,
+  "results": [
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "original_contract_status": "graded",
+      "original_score": 1.0,
+      "removed_singleton_array": false,
+      "content_passed": 6,
+      "content_total": 6,
+      "answer_sha256": "b8f08ba86255eb103093e0aa47bb84d8f6d5b78068fdaa12398974137c5ba207"
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "original_contract_status": "graded",
+      "original_score": 1.0,
+      "removed_singleton_array": false,
+      "content_passed": 6,
+      "content_total": 6,
+      "answer_sha256": "b8f08ba86255eb103093e0aa47bb84d8f6d5b78068fdaa12398974137c5ba207"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "original_contract_status": "graded",
+      "original_score": 1.0,
+      "removed_singleton_array": false,
+      "content_passed": 6,
+      "content_total": 6,
+      "answer_sha256": "b8f08ba86255eb103093e0aa47bb84d8f6d5b78068fdaa12398974137c5ba207"
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "original_contract_status": "format_error",
+      "original_score": 0.0,
+      "removed_singleton_array": true,
+      "content_passed": 6,
+      "content_total": 6,
+      "answer_sha256": "d30a9d4c68a3014c7a25e1de7e5012b82bbd0b11b8b2b01f1a5050dec1ebd947"
+    }
+  ]
+}

@@ -1,0 +1,874 @@
+{
+  "runs": [
+    {
+      "seed": 10569335738111803925,
+      "suite": "general-v2",
+      "suite_fingerprint": "e441a044a4ff69ef9e8d1a601ad1fc49f8f847e48cda5919fd90c69584f46014",
+      "variants": [
+        {
+          "harness": "command-code",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "effort": "high",
+          "id": "command-code:deepseek/deepseek-v4.1-flash@high"
+        },
+        {
+          "harness": "command-code",
+          "model": "z-ai/glm-5.3-flash",
+          "effort": "high",
+          "id": "command-code:z-ai/glm-5.3-flash@high"
+        },
+        {
+          "harness": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "id": "codex:gpt-6.1-sol@high"
+        },
+        {
+          "harness": "codex",
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "id": "codex:gpt-6-luna@high"
+        }
+      ],
+      "models": [
+        "deepseek/deepseek-v4.1-flash",
+        "z-ai/glm-5.3-flash",
+        "gpt-6.1-sol",
+        "gpt-6-luna"
+      ],
+      "tasks": [
+        "config-merge",
+        "snapshot-pagination",
+        "morning-planner",
+        "expense-reconciliation",
+        "browser-snapshots",
+        "desktop-snapshots"
+      ],
+      "cli_versions": {
+        "cmd": "1.82.5",
+        "codex": "codex-cli 0.162.1"
+      },
+      "git_commit": "e9f7162bac9355fa18cb482d4344b9c68fc9dbce",
+      "zdr_enforced": false,
+      "max_turns": 1,
+      "timeout_seconds": 180,
+      "reasoning_effort": "explicit per variant",
+      "tools": "no tool use permitted",
+      "task_domains": {
+        "config-merge": "coding",
+        "snapshot-pagination": "coding",
+        "morning-planner": "everyday",
+        "expense-reconciliation": "everyday",
+        "browser-snapshots": "browser",
+        "desktop-snapshots": "computer"
+      },
+      "domain_weights": {
+        "coding": 0.25,
+        "everyday": 0.25,
+        "browser": 0.25,
+        "computer": 0.25
+      },
+      "scope": "full"
+    }
+  ],
+  "results": [
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "config-merge",
+      "dimension": "implementation",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "cb95d3c06672d98901286015b854a800c2362a7395da3daf1953f014f772e519",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 13645,
+        "outputTokens": 1609,
+        "cacheReadTokens": 5760,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "config-merge",
+      "dimension": "implementation",
+      "status": "format_error",
+      "score": 0.0,
+      "exit_code": 0,
+      "prompt_sha256": "cb95d3c06672d98901286015b854a800c2362a7395da3daf1953f014f772e519",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 16890,
+        "outputTokens": 155,
+        "cacheReadTokens": 8704,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "config-merge",
+      "dimension": "implementation",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "cb95d3c06672d98901286015b854a800c2362a7395da3daf1953f014f772e519",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 12171,
+        "outputTokens": 362,
+        "cacheReadTokens": 8320,
+        "reasoningTokens": 205
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "config-merge",
+      "dimension": "implementation",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "cb95d3c06672d98901286015b854a800c2362a7395da3daf1953f014f772e519",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 11479,
+        "outputTokens": 496,
+        "cacheReadTokens": 9728,
+        "reasoningTokens": 254
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "snapshot-pagination",
+      "dimension": "bug-repair",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "d4546b8dbc5954bbc1411ea22d9482b282812aad22b99a36fca3b9b246c62a92",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 13670,
+        "outputTokens": 675,
+        "cacheReadTokens": 4096,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "snapshot-pagination",
+      "dimension": "bug-repair",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "d4546b8dbc5954bbc1411ea22d9482b282812aad22b99a36fca3b9b246c62a92",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 11487,
+        "outputTokens": 243,
+        "cacheReadTokens": 0,
+        "reasoningTokens": 83
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "snapshot-pagination",
+      "dimension": "bug-repair",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "d4546b8dbc5954bbc1411ea22d9482b282812aad22b99a36fca3b9b246c62a92",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 12181,
+        "outputTokens": 250,
+        "cacheReadTokens": 8320,
+        "reasoningTokens": 57
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "snapshot-pagination",
+      "dimension": "bug-repair",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 24,
+      "total": 24,
+      "exit_code": 0,
+      "prompt_sha256": "d4546b8dbc5954bbc1411ea22d9482b282812aad22b99a36fca3b9b246c62a92",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "coding",
+      "usage": {
+        "inputTokens": 16901,
+        "outputTokens": 516,
+        "cacheReadTokens": 8704,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "morning-planner",
+      "dimension": "constraint following and useful planning",
+      "status": "graded",
+      "score": 1.0,
+      "exit_code": 0,
+      "prompt_sha256": "7576f384f297b654992ac927434f0d30a3503ccbcb26a57fe7c4b82af3ab95c7",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "everyday",
+      "selected_priority": 28,
+      "optimal_priority": 28,
+      "feasible": true,
+      "usage": {
+        "inputTokens": 12373,
+        "outputTokens": 470,
+        "cacheReadTokens": 0,
+        "reasoningTokens": 411
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "morning-planner",
+      "dimension": "constraint following and useful planning",
+      "status": "graded",
+      "score": 1.0,
+      "exit_code": 0,
+      "prompt_sha256": "7576f384f297b654992ac927434f0d30a3503ccbcb26a57fe7c4b82af3ab95c7",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "everyday",
+      "selected_priority": 28,
+      "optimal_priority": 28,
+      "feasible": true,
+      "usage": {
+        "inputTokens": 11681,
+        "outputTokens": 1319,
+        "cacheReadTokens": 1792,
+        "reasoningTokens": 1260
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "morning-planner",
+      "dimension": "constraint following and useful planning",
+      "status": "graded",
+      "score": 1.0,
+      "exit_code": 0,
+      "prompt_sha256": "7576f384f297b654992ac927434f0d30a3503ccbcb26a57fe7c4b82af3ab95c7",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "everyday",
+      "selected_priority": 28,
+      "optimal_priority": 28,
+      "feasible": true,
+      "usage": {
+        "inputTokens": 13889,
+        "outputTokens": 3247,
+        "cacheReadTokens": 11520,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "morning-planner",
+      "dimension": "constraint following and useful planning",
+      "status": "graded",
+      "score": 1.0,
+      "exit_code": 0,
+      "prompt_sha256": "7576f384f297b654992ac927434f0d30a3503ccbcb26a57fe7c4b82af3ab95c7",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "everyday",
+      "selected_priority": 28,
+      "optimal_priority": 28,
+      "feasible": true,
+      "usage": {
+        "inputTokens": 17105,
+        "outputTokens": 2580,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "expense-reconciliation",
+      "dimension": "deduplication, updates and arithmetic",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 4,
+      "total": 4,
+      "exit_code": 0,
+      "prompt_sha256": "2bb85fa4aa62ae0094e5eb59af5c91e229e2f9524a9141ea1863eff38d6db61f",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "everyday",
+      "field_results": {
+        "total_cents": true,
+        "included_ids": true,
+        "excluded_ids": true,
+        "needs_exchange_rate": true
+      },
+      "usage": {
+        "inputTokens": 12458,
+        "outputTokens": 95,
+        "cacheReadTokens": 4096,
+        "reasoningTokens": 37
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "expense-reconciliation",
+      "dimension": "deduplication, updates and arithmetic",
+      "status": "graded",
+      "score": 0.5,
+      "passed": 2,
+      "total": 4,
+      "exit_code": 0,
+      "prompt_sha256": "2bb85fa4aa62ae0094e5eb59af5c91e229e2f9524a9141ea1863eff38d6db61f",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "everyday",
+      "field_results": {
+        "total_cents": false,
+        "included_ids": true,
+        "excluded_ids": false,
+        "needs_exchange_rate": true
+      },
+      "usage": {
+        "inputTokens": 17192,
+        "outputTokens": 57,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "expense-reconciliation",
+      "dimension": "deduplication, updates and arithmetic",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 4,
+      "total": 4,
+      "exit_code": 0,
+      "prompt_sha256": "2bb85fa4aa62ae0094e5eb59af5c91e229e2f9524a9141ea1863eff38d6db61f",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "everyday",
+      "field_results": {
+        "total_cents": true,
+        "included_ids": true,
+        "excluded_ids": true,
+        "needs_exchange_rate": true
+      },
+      "usage": {
+        "inputTokens": 13950,
+        "outputTokens": 535,
+        "cacheReadTokens": 4096,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "expense-reconciliation",
+      "dimension": "deduplication, updates and arithmetic",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 4,
+      "total": 4,
+      "exit_code": 0,
+      "prompt_sha256": "2bb85fa4aa62ae0094e5eb59af5c91e229e2f9524a9141ea1863eff38d6db61f",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "everyday",
+      "field_results": {
+        "total_cents": true,
+        "included_ids": true,
+        "excluded_ids": true,
+        "needs_exchange_rate": true
+      },
+      "usage": {
+        "inputTokens": 11766,
+        "outputTokens": 179,
+        "cacheReadTokens": 0,
+        "reasoningTokens": 121
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "browser-snapshots",
+      "dimension": "DOM grounding and workflow decisions",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "159ffcd9f44205626e1df7571675eaf37bdcda7b00eebe4ff207514a8f099e04",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "browser",
+      "case_results": {
+        "b85486": true,
+        "b69177": true,
+        "b96844": true,
+        "b10869": true,
+        "b76636": true,
+        "b15885": true
+      },
+      "usage": {
+        "inputTokens": 14390,
+        "outputTokens": 338,
+        "cacheReadTokens": 5888,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "browser-snapshots",
+      "dimension": "DOM grounding and workflow decisions",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "159ffcd9f44205626e1df7571675eaf37bdcda7b00eebe4ff207514a8f099e04",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "browser",
+      "case_results": {
+        "b85486": true,
+        "b69177": true,
+        "b96844": true,
+        "b10869": true,
+        "b76636": true,
+        "b15885": true
+      },
+      "usage": {
+        "inputTokens": 17589,
+        "outputTokens": 229,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "browser-snapshots",
+      "dimension": "DOM grounding and workflow decisions",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "159ffcd9f44205626e1df7571675eaf37bdcda7b00eebe4ff207514a8f099e04",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "browser",
+      "case_results": {
+        "b85486": true,
+        "b69177": true,
+        "b96844": true,
+        "b10869": true,
+        "b76636": true,
+        "b15885": true
+      },
+      "usage": {
+        "inputTokens": 12858,
+        "outputTokens": 119,
+        "cacheReadTokens": 0,
+        "reasoningTokens": 18
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "browser-snapshots",
+      "dimension": "DOM grounding and workflow decisions",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "159ffcd9f44205626e1df7571675eaf37bdcda7b00eebe4ff207514a8f099e04",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "browser",
+      "case_results": {
+        "b85486": true,
+        "b69177": true,
+        "b96844": true,
+        "b10869": true,
+        "b76636": true,
+        "b15885": true
+      },
+      "usage": {
+        "inputTokens": 12168,
+        "outputTokens": 169,
+        "cacheReadTokens": 0,
+        "reasoningTokens": 68
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "task": "desktop-snapshots",
+      "dimension": "focus, dialogs and coordinate frames",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "0ccfdb12f5fbd2e3e71810ee89ea2d9e2b1fde24713a56734b50e409b6c9f6d9",
+      "observed_models": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "computer",
+      "case_results": {
+        "d55968": true,
+        "d71440": true,
+        "d88220": true,
+        "d49657": true,
+        "d86832": true,
+        "d79833": true
+      },
+      "usage": {
+        "inputTokens": 14230,
+        "outputTokens": 538,
+        "cacheReadTokens": 4096,
+        "cacheWriteTokens": 0
+      }
+    },
+    {
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6-luna@high",
+      "task": "desktop-snapshots",
+      "dimension": "focus, dialogs and coordinate frames",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "0ccfdb12f5fbd2e3e71810ee89ea2d9e2b1fde24713a56734b50e409b6c9f6d9",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "computer",
+      "case_results": {
+        "d55968": true,
+        "d71440": true,
+        "d88220": true,
+        "d49657": true,
+        "d86832": true,
+        "d79833": true
+      },
+      "usage": {
+        "inputTokens": 12039,
+        "outputTokens": 235,
+        "cacheReadTokens": 11008,
+        "reasoningTokens": 124
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "variant": "codex:gpt-6.1-sol@high",
+      "task": "desktop-snapshots",
+      "dimension": "focus, dialogs and coordinate frames",
+      "status": "graded",
+      "score": 1.0,
+      "passed": 6,
+      "total": 6,
+      "exit_code": 0,
+      "prompt_sha256": "0ccfdb12f5fbd2e3e71810ee89ea2d9e2b1fde24713a56734b50e409b6c9f6d9",
+      "observed_models": [],
+      "observed_efforts": [],
+      "identity_source": "invocation (not exposed in Codex JSONL)",
+      "domain": "computer",
+      "case_results": {
+        "d55968": true,
+        "d71440": true,
+        "d88220": true,
+        "d49657": true,
+        "d86832": true,
+        "d79833": true
+      },
+      "usage": {
+        "inputTokens": 12725,
+        "outputTokens": 158,
+        "cacheReadTokens": 8320,
+        "reasoningTokens": 47
+      }
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "task": "desktop-snapshots",
+      "dimension": "focus, dialogs and coordinate frames",
+      "status": "format_error",
+      "score": 0.0,
+      "exit_code": 0,
+      "prompt_sha256": "0ccfdb12f5fbd2e3e71810ee89ea2d9e2b1fde24713a56734b50e409b6c9f6d9",
+      "observed_models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "observed_efforts": [
+        "high"
+      ],
+      "identity_source": "CLI request events",
+      "domain": "computer",
+      "usage": {
+        "inputTokens": 17461,
+        "outputTokens": 612,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      }
+    }
+  ],
+  "aggregates": [
+    {
+      "variant": "command-code:deepseek/deepseek-v4.1-flash@high",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "score": 1.0,
+      "domain_scores": {
+        "coding": 1.0,
+        "everyday": 1.0,
+        "browser": 1.0,
+        "computer": 1.0
+      },
+      "graded": 6,
+      "tasks": 6,
+      "usage": {
+        "inputTokens": 83774,
+        "outputTokens": 6942,
+        "cacheReadTokens": 35456,
+        "cacheWriteTokens": 0
+      },
+      "format_failures": 0,
+      "full_passes": 6
+    },
+    {
+      "variant": "command-code:z-ai/glm-5.3-flash@high",
+      "model": "z-ai/glm-5.3-flash",
+      "harness": "command-code",
+      "effort": "high",
+      "score": 0.5625,
+      "domain_scores": {
+        "coding": 0.5,
+        "everyday": 0.75,
+        "browser": 1.0,
+        "computer": 0.0
+      },
+      "graded": 6,
+      "tasks": 6,
+      "usage": {
+        "inputTokens": 103138,
+        "outputTokens": 4149,
+        "cacheReadTokens": 17408,
+        "cacheWriteTokens": 0
+      },
+      "format_failures": 2,
+      "full_passes": 3
+    },
+    {
+      "variant": "codex:gpt-6.1-sol@high",
+      "model": "gpt-6.1-sol",
+      "harness": "codex",
+      "effort": "high",
+      "score": 1.0,
+      "domain_scores": {
+        "coding": 1.0,
+        "everyday": 1.0,
+        "browser": 1.0,
+        "computer": 1.0
+      },
+      "graded": 6,
+      "tasks": 6,
+      "usage": {
+        "inputTokens": 74766,
+        "outputTokens": 1454,
+        "cacheReadTokens": 29056,
+        "reasoningTokens": 775
+      },
+      "format_failures": 0,
+      "full_passes": 6
+    },
+    {
+      "variant": "codex:gpt-6-luna@high",
+      "model": "gpt-6-luna",
+      "harness": "codex",
+      "effort": "high",
+      "score": 1.0,
+      "domain_scores": {
+        "coding": 1.0,
+        "everyday": 1.0,
+        "browser": 1.0,
+        "computer": 1.0
+      },
+      "graded": 6,
+      "tasks": 6,
+      "usage": {
+        "inputTokens": 70620,
+        "outputTokens": 2641,
+        "cacheReadTokens": 22528,
+        "reasoningTokens": 1910
+      },
+      "format_failures": 0,
+      "full_passes": 6
+    }
+  ]
+}

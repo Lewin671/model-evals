@@ -98,18 +98,26 @@ def domain_table(data):
     lines=["| Model | Effort | "+" | ".join(DOMAIN_LABELS[d] for d in domains)+" |",
            "|:--|:--|"+"--:|"*len(domains)]
     for a in data["aggregates"]:
-        lines.append(f"| `{a['model']}` | {a['effort']} | "+" | ".join(percent(a["domain_scores"].get(d)) for d in domains)+" |")
+        values=[]
+        for d in domains:
+            failed=any(r["variant"]==a["variant"] and r.get("domain")==d and r["status"]=="format_error" for r in data["results"])
+            values.append(percent(a["domain_scores"].get(d))+(" *" if failed else ""))
+        lines.append(f"| `{a['model']}` | {a['effort']} | "+" | ".join(values)+" |")
     return "\n".join(lines)
 
 
 def leaderboard(data):
-    lines=["| Model | Reasoning effort | Source | Score | Full passes | Input / output tokens |",
+    general=bool(data["runs"][0].get("domain_weights"))
+    score_label="Strict outcome" if general else "Score"
+    reliability_label="Format failures" if general else "Full passes"
+    lines=[f"| Model | Reasoning effort | Source | {score_label} | {reliability_label} | Input / output tokens |",
            "|:--|:--|:--|--:|--:|--:|"]
     ordered=sorted(data["aggregates"],key=lambda r:-(r["score"] if r["score"] is not None else -1))
     for a in ordered:
         u=a["usage"]
         tokens=f"{u['inputTokens']:,} / {u['outputTokens']:,}" if {"inputTokens","outputTokens"}<=u.keys() else "—"
         coverage=f"{a['full_passes']}/{a['tasks']}" if a["score"] is not None else f"incomplete ({a['graded']}/{a['tasks']})"
+        if general and a["score"] is not None: coverage=f"{a['format_failures']}/{a['tasks']}"
         lines.append(f"| `{a['model']}` | `{a['effort']}` | {source_label(a['harness'])} | **{percent(a['score'])}** | {coverage} | {tokens} |")
     return "\n".join(lines)
 
@@ -127,6 +135,7 @@ def markdown(data):
     if first.get("domain_weights"):
         index=lines.index("## Task breakdown")
         lines[index:index]=["## Domain breakdown", "",domain_table(data),"",
+            "\\* Includes a response-contract failure scored as zero under the frozen rules. Inspect the response before interpreting it as a reasoning failure.","",
             "Browser/desktop results measure independent structured-state decisions, not real browsing, visual perception, or interactive tool execution.",""]
     for r in data["results"]:
         checks=f"{r['passed']}/{r['total']}" if "passed" in r else "—"
@@ -180,14 +189,16 @@ def scorecard(data):
         for j,t in enumerate(tasks):
             row=next((r for r in data["results"] if r["variant"]==a["variant"] and r["task"]==t),{})
             val=a["domain_scores"].get(t) if domains else row.get("score")
+            format_failed=domains and any(r["variant"]==a["variant"] and r.get("domain")==t and r["status"]=="format_error" for r in data["results"])
             color="#243040" if val is None else ("#155b4d" if val==1 else "#704b23" if val>0 else "#713742")
             x=381+j*spacing
             svg += [f'<rect x="{x}" y="{y}" width="{cell_width}" height="49" rx="7" fill="{color}"/>',
-                    f'<text x="{x+cell_width/2}" y="{y+30}" text-anchor="middle" font-size="14">{percent(val)}</text>']
+                    f'<text x="{x+cell_width/2}" y="{y+30}" text-anchor="middle" font-size="14">{percent(val)}{" *" if format_failed else ""}</text>']
         svg.append(f'<text x="1008" y="{y+31}" text-anchor="middle" font-size="18" font-weight="600">{percent(a["score"])}</text>')
     if data["runs"][0].get("ground_truth_revision"):
         svg.append(f'<text x="28" y="{height-12}" fill="#9ba8ba" font-size="11">Security ground truth corrected uniformly; see Adjudication 001. Small sample; no general ranking.</text>')
     elif domains:
+        svg.append(f'<text x="28" y="{height-27}" fill="#9ba8ba" font-size="11">* Includes a response-contract failure. Strict outcome is not a pure reasoning score; inspect the responses.</text>')
         svg.append(f'<text x="28" y="{height-12}" fill="#9ba8ba" font-size="11">Browser/desktop: structured snapshot reasoning only. No real tool use or visual perception measured.</text>')
     return "\n".join(svg+["</g></svg>"])
 

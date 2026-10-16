@@ -24,13 +24,29 @@ its code against hidden inputs, and keep the cost low enough to rerun deliberate
 
 <!-- RESULTS:START -->
 
-The general-v2 comparison is being prepared. No estimated scores are shown.
+| Model | Reasoning effort | Source | Strict outcome | Format failures | Input / output tokens |
+|:--|:--|:--|--:|--:|--:|
+| `deepseek/deepseek-v4.1-flash` | `high` | Command Code | **100.0%** | 0/6 | 83,774 / 6,942 |
+| `gpt-6.1-sol` | `high` | Codex | **100.0%** | 0/6 | 74,766 / 1,454 |
+| `gpt-6-luna` | `high` | Codex | **100.0%** | 0/6 | 70,620 / 2,641 |
+| `z-ai/glm-5.3-flash` | `high` | Command Code | **56.2%** | 2/6 | 103,138 / 4,149 |
+
+![Per-task scorecard](results/general-v2-screening-01/scorecard.svg)
+
+[Full results](results/general-v2-screening-01/report.md) · [Machine-readable data](results/general-v2-screening-01/summary.json) · [Model responses](results/general-v2-screening-01/responses.md)
+
+One attempt per task; screening results, not a general model ranking.
 
 <!-- RESULTS:END -->
 
 **Four equally weighted domains.** Coding, everyday tasks, browser snapshots and desktop snapshots
 contribute 25% each. Browser/desktop scores measure decisions from structured state, not actual
 browsing, visual perception or end-to-end computer operation.
+
+**Latest findings:** DeepSeek, Sol and Luna fulfilled all tested bundles. GLM had two response-contract
+failures and omitted an approved credit. Its desktop answer's six actions were nevertheless correct
+inside an extra array wrapper. The UI choices therefore did not distinguish the models in this screen.
+[Read the failure analysis and separate content diagnostic →](results/general-v2-screening-01/findings.md)
 
 [Task construction and scoring →](docs/general-v2.md) · [Archived micro-v1 results](results/2026-10-15-micro-v1/report.md)
 

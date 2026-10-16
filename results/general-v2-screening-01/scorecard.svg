@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="451" viewBox="0 0 1080 451" role="img" aria-labelledby="title desc">
+<title id="title">Model evaluation scorecard</title>
+<desc id="desc">Scores by model, reasoning effort and task. Missing results are shown as dashes.</desc>
+<rect width="1080" height="451" rx="16" fill="#10151d"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" fill="#e8edf5">
+<text x="28" y="38" font-size="20" font-weight="600">MODEL EVALS</text>
+<text x="28" y="64" fill="#9ba8ba" font-size="13">general-v2 · one attempt · equal domain weights · higher is better</text>
+<text x="441.0" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Coding</text>
+<text x="573.0" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Everyday</text>
+<text x="705.0" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Browser (sim.)</text>
+<text x="837.0" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Desktop (sim.)</text>
+<text x="1008" y="104" font-size="12" text-anchor="middle" fill="#aab8c9">Overall</text>
+<text x="28" y="143" font-size="14" font-weight="600">deepseek/deepseek-v4.1-flash</text>
+<text x="28" y="165" font-size="12" fill="#9ba8ba">high effort · Command Code</text>
+<rect x="381" y="122" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="441.0" y="152" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="513" y="122" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="573.0" y="152" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="645" y="122" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="705.0" y="152" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="777" y="122" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="837.0" y="152" text-anchor="middle" font-size="14">100.0%</text>
+<text x="1008" y="153" text-anchor="middle" font-size="18" font-weight="600">100.0%</text>
+<text x="28" y="217" font-size="14" font-weight="600">gpt-6.1-sol</text>
+<text x="28" y="239" font-size="12" fill="#9ba8ba">high effort · Codex</text>
+<rect x="381" y="196" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="441.0" y="226" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="513" y="196" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="573.0" y="226" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="645" y="196" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="705.0" y="226" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="777" y="196" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="837.0" y="226" text-anchor="middle" font-size="14">100.0%</text>
+<text x="1008" y="227" text-anchor="middle" font-size="18" font-weight="600">100.0%</text>
+<text x="28" y="291" font-size="14" font-weight="600">gpt-6-luna</text>
+<text x="28" y="313" font-size="12" fill="#9ba8ba">high effort · Codex</text>
+<rect x="381" y="270" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="441.0" y="300" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="513" y="270" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="573.0" y="300" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="645" y="270" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="705.0" y="300" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="777" y="270" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="837.0" y="300" text-anchor="middle" font-size="14">100.0%</text>
+<text x="1008" y="301" text-anchor="middle" font-size="18" font-weight="600">100.0%</text>
+<text x="28" y="365" font-size="14" font-weight="600">z-ai/glm-5.3-flash</text>
+<text x="28" y="387" font-size="12" fill="#9ba8ba">high effort · Command Code</text>
+<rect x="381" y="344" width="120" height="49" rx="7" fill="#704b23"/>
+<text x="441.0" y="374" text-anchor="middle" font-size="14">50.0% *</text>
+<rect x="513" y="344" width="120" height="49" rx="7" fill="#704b23"/>
+<text x="573.0" y="374" text-anchor="middle" font-size="14">75.0%</text>
+<rect x="645" y="344" width="120" height="49" rx="7" fill="#155b4d"/>
+<text x="705.0" y="374" text-anchor="middle" font-size="14">100.0%</text>
+<rect x="777" y="344" width="120" height="49" rx="7" fill="#713742"/>
+<text x="837.0" y="374" text-anchor="middle" font-size="14">0.0% *</text>
+<text x="1008" y="375" text-anchor="middle" font-size="18" font-weight="600">56.2%</text>
+<text x="28" y="424" fill="#9ba8ba" font-size="11">* Includes a response-contract failure. Strict outcome is not a pure reasoning score; inspect the responses.</text>
+<text x="28" y="439" fill="#9ba8ba" font-size="11">Browser/desktop: structured snapshot reasoning only. No real tool use or visual perception measured.</text>
+</g></svg>

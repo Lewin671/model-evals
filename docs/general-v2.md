@@ -65,6 +65,12 @@ independent; selecting an action does not cause a subsequent model observation.
 No real browsing, buying, login, site account or browser extension is used by these tasks.
 The scores concern grounding and workflow decisions from structured state, not browser tool proficiency.
 
+The two display-name checkpoints deliberately share the same goal and requested value.
+Only the observation changes: uncommitted text needs Save; confirmed persisted text needs
+Finish. This paired control tests whether the model uses state rather than repeats a
+generic plan. The other checkpoint families are not all counterfactually paired in this
+small version, which limits how much can be inferred from their pass rate.
+
 ## Desktop: focus, coordinates and asynchronous state
 
 Observations describe windows, focused controls, dialogs, geometry and progress. They
@@ -93,6 +99,12 @@ are exported so a partial score can be traced to a concrete decision.
 Code outputs and UI action schemas still impose a structured-output requirement. A lower
 score may reflect that interface constraint. Keep the response evidence visible rather
 than attributing every failure to general intelligence.
+
+Published strict outcomes include response-contract failures as zero, following the
+predeclared rules. Reports separately count those failures and mark affected domain cells.
+If content can be inspected after a trivial wrapper repair, report it as a clearly labeled
+post-hoc diagnostic, not a replacement score. Do not rerun a failed answer or silently
+normalize it after seeing which model benefits.
 
 ## What to add only if this screen is insufficient
 
