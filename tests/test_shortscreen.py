@@ -21,3 +21,23 @@ class ShortScreen(unittest.TestCase):
             self.assertFalse(grade(t,answer)['complete'])
             t=task('browser',variant)
             self.assertFalse(grade(t,{'action':'save','plan':'C','annual_total':70})['complete'])
+
+    def test_explicit_continuation_never_retries_recorded_failure(self):
+        import contextlib,io,json,tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from evalkit.shortscreen import run
+        rows=[{'task':'coding-A','model':m,'status':'adapter_or_response_contract_failure','grade':None} for m in run.MODELS]
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            (root/'manifest.json').write_text(json.dumps({'commit':'frozen'}))
+            (root/'results.json').write_text(json.dumps(rows))
+            (root/'usage.json').write_text(json.dumps({'cliInvocations':2,'observedModelRequests':2,'inputTokens':10,'outputTokens':3,'cacheReadTokens':0}))
+            frozen=Path(run.__file__).with_name('tasks.py').read_bytes()
+            def command(argv,**kwargs):
+                if argv[:2]==['git','show']:return frozen
+                return 'test-version\n'
+            with patch('sys.argv',['run','--output',d,'--execute','--resume-unattempted']),patch.object(run,'qualify',return_value={}),patch.object(run,'suite',return_value=[task('coding','A')]),patch.object(run.subprocess,'check_output',side_effect=command),patch.object(run,'invoke') as invoke,contextlib.redirect_stdout(io.StringIO()):
+                run.main()
+            invoke.assert_not_called()
+            self.assertEqual(json.loads((root/'results.json').read_text()),rows)

@@ -1,0 +1,13 @@
+[
+  {
+    "type": "tool_queued",
+    "toolName": "shell_command",
+    "input": {
+      "command": "echo"
+    }
+  },
+  {
+    "type": "tool_denied",
+    "toolName": "shell_command"
+  }
+]

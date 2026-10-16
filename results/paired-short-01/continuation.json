@@ -1,0 +1,4 @@
+{
+  "policy": "Skip every recorded episode including failures; invoke only unattempted slots",
+  "adapter_fingerprint": "94f828a5db43a09cbefe9530f0f672c71036e155a2e7ff3a390a731573880ceb"
+}

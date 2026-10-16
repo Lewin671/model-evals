@@ -1,0 +1,31 @@
+{
+  "action": "save",
+  "plan": "A",
+  "annual_total": 92,
+  "comparison": {
+    "A": {
+      "base": 84,
+      "seats": 6,
+      "audit_export": true,
+      "checkout_all_in": 92,
+      "eligible": true
+    },
+    "B": {
+      "base": 96,
+      "seats": 6,
+      "audit_export": true,
+      "checkout_all_in": 104,
+      "eligible": true
+    },
+    "C": {
+      "base": 70,
+      "seats": 5,
+      "audit_export": true,
+      "checkout_all_in": 70,
+      "eligible": false,
+      "reason": "max_seats 5 < 6"
+    }
+  },
+  "notes": "Checkout superseded base prices; A cheapest eligible 6-seat annual with audit export at $92.",
+  "artifact": "shopping_comparison.json"
+}

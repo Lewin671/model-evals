@@ -8,7 +8,7 @@
 [![Status](https://img.shields.io/badge/status-recalibrating-b7791f?style=flat)](docs/challenge-design.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
 
-[Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
+[Latest diagnostic](results/paired-short-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
 
 </div>
 
@@ -18,19 +18,28 @@ usage must accompany every measured result.
 
 ## Current status
 
-**There is no validated capability ranking yet.** The initial tasks were too easy to
-separate the stronger configurations. The UI snapshots mostly tested obvious next-step
-selection. Response-format failures also exaggerated the apparent capability gap.
+**The short paired screen now exposes specific differences, but there is no validated general ranking.**
+Both models ran at **low reasoning effort**, verified from CLI events. The screen used
+23 requests and 6,050 reported output tokens. Its 355,773 reported input tokens include
+substantial CLI context overhead; a short response does not mean a tiny input bill.
 
-Those runs remain available as prototype records, but their score tables and charts have
-been removed from the main comparison. Repeating the same easy templates would not fix
-the ceiling effect. The first replacement is an implemented [incremental-importer coding
-workflow](docs/importer-calibration.md), with reference traces and local qualification
-gates. Its first valid episode passes **11/11** checks (DeepSeek v4.1 Flash, **low**, three requests).
-The pilot stopped at its output-token guard before paired GLM runs; this is **incomplete evidence**,
-not a model comparison. The other three workflow families remain specifications.
+| Model · Command Code · low effort | Coding A / B | Everyday A / B | Browser simulation A / B | Desktop simulation A / B |
+|:--|:--|:--|:--|:--|
+| DeepSeek v4.1 Flash | ✓ / ✓ | ✓ / ✗ | ✓ / — | ✗ / △ |
+| GLM 5.3 Flash | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
 
-[Inspect the measured result, source artifacts and tool trace →](results/importer-native-calibration-01/report.md)
+✓ complete · ✗ content defect · △ correct numeric data, invalid export header · — protocol failure, excluded.
+The missing case prevents a balanced four-domain aggregate. One run per case is not a
+reliability estimate. Codex has not run on these replacement tasks.
+
+[Measured results and all prompts/responses](results/paired-short-01/report.md) ·
+[What actually failed](results/paired-short-01/failure-analysis.md) ·
+[Frozen short-screen design](docs/paired-short-screen.md)
+
+The earlier importer task passed 11/11 for one DeepSeek episode, but stopped before a
+paired GLM run. The original prototypes were too easy and remain archived below.
+The larger everyday/browser/desktop workflows are still specifications; this short screen
+uses small text-state simulations and does not replace real application testing.
 
 ## Replacement workflow evidence
 
