@@ -71,3 +71,34 @@ folder; a continuation must retain that effort. No low-effort response is suppli
 the high-effort models. Personal defaults and parent ZDR remain unchanged. Report
 per-model low/high transitions, usage and missing results. A single additional sample
 cannot isolate effort from sampling variation.
+
+## GPT-6 Luna through Codex
+
+The added configuration is exactly `gpt-6-luna`, separately at low and high effort.
+Each run repeats all eight frozen cases, with twelve Codex exec invocations and the same
+120-second timeout and 16,000 reported-output soft guard. Task/checker and prompts are
+unchanged. Each simulator response is a fresh exec supplied with the preceding action
+and observation; no answer from another model or effort enters its context.
+
+Codex uses explicit `--model` and `model_reasoning_effort` configuration, ignores personal
+config/rules, runs ephemerally outside the checkout, and disables discovered tools and
+integrations. No additional response schema is applied. Existing CLI authentication is
+used; personal defaults are not changed. These controls use the existing tested Codex
+adapter. See [official configuration documentation](https://learn.chatgpt.com/docs/config-file/config-reference).
+
+Codex JSONL does not expose independent model/effort identity or underlying request/retry
+counts. Record them as **configured via invocation**, not request-event verified. Usage
+comes from turn.completed; budget Codex exec invocations, not claimed provider requests.
+The one-turn response rule is checked through completion events and absence of tool items.
+A CLI/protocol failure stops the run; an explicit continuation may execute only previously
+unattempted episodes, without retrying failures or changing the task/checker/effort.
+
+This is a cross-harness comparison: different system context and native tool presentation
+may affect both outcomes and token overhead. Equal effort names do not imply equal
+reasoning compute. Report model + effort + harness together, without attributing all
+observed differences to the underlying base model.
+
+```sh
+python3 -m evalkit.shortscreen.run --harness codex --models gpt-6-luna --effort low --output .runs/luna-low --execute
+python3 -m evalkit.shortscreen.run --harness codex --models gpt-6-luna --effort high --output .runs/luna-high --execute
+```

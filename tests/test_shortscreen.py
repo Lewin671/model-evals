@@ -72,3 +72,25 @@ class ShortScreen(unittest.TestCase):
             with patch('sys.argv',['run','--output',d,'--effort','high','--execute','--resume-unattempted']),patch.object(run,'qualify',return_value={}),patch.object(run,'invoke') as invoke,contextlib.redirect_stdout(io.StringIO()),self.assertRaisesRegex(RuntimeError,'effort changed'):
                 run.main()
             invoke.assert_not_called()
+
+    def test_codex_keeps_configured_identity_separate_from_observation(self):
+        import contextlib,io,json,tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from evalkit.shortscreen import run
+        t=task('everyday','A')
+        for effort in ('low','high'):
+            def invoke(model,case,turns,timeout,configured,**kwargs):
+                self.assertEqual((model,configured,kwargs['harness']),('gpt-6-luna',effort,'codex'))
+                events=[{'type':'item.completed','item':{'type':'agent_message','text':json.dumps(t['expected'])}},
+                    {'type':'turn.completed','usage':{'input_tokens':12,'output_tokens':3,'cached_input_tokens':0}}]
+                return 0,'\n'.join(map(json.dumps,events)),''
+            with tempfile.TemporaryDirectory() as d:
+                root=Path(d)/'run'
+                with patch('sys.argv',['run','--output',str(root),'--effort',effort,'--harness','codex','--execute']),patch.object(run,'qualify',return_value={}),patch.object(run,'suite',return_value=[t]),patch.object(run.subprocess,'check_output',return_value='test-version\n'),patch.object(run,'invoke',side_effect=invoke),contextlib.redirect_stdout(io.StringIO()):run.main()
+                row=json.loads((root/'results.json').read_text())[0]
+                self.assertTrue(row['grade']['complete'])
+                self.assertEqual(row['steps'][0]['models_observed'],[])
+                self.assertEqual(row['steps'][0]['efforts_observed'],[])
+                self.assertEqual(json.loads((root/'usage.json').read_text())['outputTokens'],3)
+                self.assertIsNone(json.loads((root/'manifest.json').read_text())['max_model_requests'])

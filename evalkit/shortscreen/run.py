@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from datetime import datetime,timezone
 from ..run import invoke,parse_result,environment,version_line
 from ..workflows.native_calibrate import usage_from_events
-from ..adapters import frames
+from ..adapters import frames,parse_codex,Variant
 from .tasks import suite,qualify,decode,observe,grade
 
 MODELS=['deepseek/deepseek-v4.1-flash','z-ai/glm-5.3-flash']
@@ -19,14 +19,23 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--execute',action='store_true')
     p.add_argument('--effort',choices=['low','high'],default='low')
+    p.add_argument('--harness',choices=['command-code','codex'],default='command-code')
+    p.add_argument('--models',nargs='+')
     p.add_argument('--resume-unattempted',action='store_true',help='explicit continuation; never retry any recorded episode')
     args=p.parse_args()
     tasks=suite();qualification=qualify()
+    models=args.models or (['gpt-6-luna'] if args.harness=='codex' else MODELS)
+    for model in models:Variant(args.harness,model,args.effort)
+    if len(set(models))!=len(models):p.error('duplicate models')
+    harness='Codex' if args.harness=='codex' else 'Command Code'
+    request_cap=sum(t['calls'] for t in tasks)*len(models)
     fingerprint=hashlib.sha256((Path(__file__).read_bytes()+Path(__file__).with_name('tasks.py').read_bytes())).hexdigest()
-    plan={'suite':'paired-short-v1','models':MODELS,'harness':'Command Code','effort':args.effort,
-        'episodes':16,'max_model_requests':24,'output_token_soft_guard':16000,
+    plan={'suite':'paired-short-v1','models':models,'harness':harness,'effort':args.effort,
+        'episodes':len(tasks)*len(models),'max_model_requests':request_cap if args.harness=='command-code' else None,'max_cli_invocations':request_cap,'output_token_soft_guard':16000,
         'per_request_timeout_seconds':120,'max_turns_per_request':1,'fingerprint':fingerprint,
-        'qualification':qualification,'zdr_enforced':False,'created_utc':datetime.now(timezone.utc).isoformat(),
+        'qualification':qualification,'zdr_enforced':False,
+        'identity_source':'invocation only; Codex JSONL does not expose model/effort' if args.harness=='codex' else 'CLI request events',
+        'request_count_source':'CLI invocations; underlying requests/retries not exposed' if args.harness=='codex' else 'CLI model-request-start events','created_utc':datetime.now(timezone.utc).isoformat(),
         'domain_weights':{d:0.25 for d in ('coding','everyday','browser','desktop')},
         'scope':'Diagnostic only; structured-state simulation, no real browser/desktop or overall ranking'}
     print(json.dumps(plan,indent=2),flush=True)
@@ -34,6 +43,7 @@ def main():
     previous=None
     if args.resume_unattempted:
         previous=json.loads((args.output/'manifest.json').read_text())
+        if previous.get('models',models)!=models or previous.get('harness',harness)!=harness:raise RuntimeError('models/harness changed; refusing continuation')
         if previous.get('effort','low')!=args.effort:raise RuntimeError('effort changed; refusing continuation')
         frozen=subprocess.check_output(['git','show',previous['commit']+':evalkit/shortscreen/tasks.py'])
         if frozen!=Path(__file__).with_name('tasks.py').read_bytes():raise RuntimeError('task/checker changed; refusing continuation')
@@ -41,7 +51,7 @@ def main():
         (args.output/'continuation.json').write_text(json.dumps({'policy':'Skip every recorded episode including failures; invoke only unattempted slots','adapter_fingerprint':fingerprint},indent=2))
     else:args.output.mkdir(parents=True,exist_ok=False)
     plan['commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-    plan['cli_version']=version_line(subprocess.check_output(['cmd','--no-auto-update','--version'],text=True,env=environment()))
+    plan['cli_version']=version_line(subprocess.check_output(['codex','--version'] if args.harness=='codex' else ['cmd','--no-auto-update','--version'],text=True,env=environment()))
     if not previous:(args.output/'manifest.json').write_text(json.dumps(plan,indent=2))
     usage={'cliInvocations':0,'observedModelRequests':0,'inputTokens':0,'outputTokens':0,'cacheReadTokens':0}
     rows=[]
@@ -54,31 +64,34 @@ def main():
         (args.output/'usage.json').write_text(json.dumps(usage,indent=2))
     checkpoint()
     for index,t in enumerate(tasks):
-        order=MODELS if index%2==0 else MODELS[::-1]
+        order=models if index%2==0 else models[::-1]
         for model in order:
             if (t['id'],model) in recorded:continue
-            if usage['observedModelRequests']+t['calls']>24 or usage['outputTokens']>=16000:
+            if usage['cliInvocations']+t['calls']>request_cap or usage['outputTokens']>=16000:
                 print('Stopped at predeclared budget guard',flush=True);return
             name=t['id']+'-'+model.split('/')[-1]
             folder=args.output/name;folder.mkdir()
             print(name,flush=True)
             row={'task':t['id'],'domain':t['domain'],'case':t['variant'],'model':model,'effort':args.effort,
-                'harness':'Command Code','steps':[],'status':'running','grade':None}
+                'harness':harness,'steps':[],'status':'running','grade':None}
             rows.append(row);checkpoint();prompt=t['prompt'];last=None
             for step in range(t['calls']):
                 stem=folder/f'step-{step+1}'
                 stem.with_suffix('.prompt.txt').write_text(prompt)
-                rc,raw,err=invoke(model,SimpleNamespace(prompt=prompt),1,120,args.effort)
+                rc,raw,err=invoke(model,SimpleNamespace(prompt=prompt),1,120,args.effort,**({'harness':'codex'} if args.harness=='codex' else {}))
                 stem.with_suffix('.cli.ndjson').write_text(raw);stem.with_suffix('.stderr.txt').write_text(err)
-                counts=usage_from_events(frames(raw))
+                counts=usage_from_events(frames(raw)) if args.harness=='command-code' else {'cliInvocations':1,'observedModelRequests':0,'inputTokens':0,'outputTokens':0,'cacheReadTokens':0}
                 for k,v in counts.items():usage[k]+=v
                 info={'request':step+1,'exit_code':rc,'usage':counts}
                 row['steps'].append(info)
                 try:
-                    result,tools=parse_result(raw)
+                    result,tools=parse_codex(raw) if args.harness=='codex' else parse_result(raw)
+                    if args.harness=='codex':
+                        for k,v in (result.get('usage') or {}).items():
+                            usage[k]=usage.get(k,0)+v;counts[k]=v
                     info.update({'models_observed':result['observed_models'],'efforts_observed':result['observed_efforts'],
-                        'tool_calls':tools,'subtype':result.get('subtype'),'answer':result.get('finalText','')})
-                    if rc!=0 or tools or result['observed_models']!=[model] or result['observed_efforts']!=[args.effort] or result.get('subtype')!='success':
+                        'identity_source':result.get('identity_source','CLI request events'),'tool_calls':tools,'subtype':result.get('subtype'),'answer':result.get('finalText','')})
+                    if rc!=0 or tools or (args.harness=='command-code' and (result['observed_models']!=[model] or result['observed_efforts']!=[args.effort])) or result.get('subtype')!='success':
                         raise RuntimeError('CLI/tool/identity/effort failure')
                     last=decode(result.get('finalText',''))
                 except (ValueError,RuntimeError) as exc:
