@@ -20,6 +20,11 @@ def suite_fingerprint():
     base=Path(__file__).parent
     return hashlib.sha256(b"".join((base/name).read_bytes() for name in ("tasks.py","grading.py"))).hexdigest()
 
+
+def version_line(text):
+    # Older cmd versions can print an updater notice before the version line.
+    return text.strip().splitlines()[-1]
+
 MODELS = ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3-flash"]
 
 
@@ -143,13 +148,15 @@ def main():
         raise RuntimeError("sandbox preflight failed")
     output=args.resume_run or args.output or Path(".runs")/datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     if not previous: output.mkdir(parents=True,exist_ok=False)
-    versions={b:subprocess.run([b,"--version"],text=True,capture_output=True,check=True).stdout.strip() for b in sorted(binaries)}
+    versions={b:version_line(subprocess.run([b]+(["--no-auto-update"] if b=="cmd" else [])+["--version"],
+        text=True,capture_output=True,check=True,env=environment()).stdout) for b in sorted(binaries)}
     plan.update({"cli_versions":versions,"created_utc":datetime.now(timezone.utc).isoformat(),
                  "git_commit":subprocess.run(["git","rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()})
     if previous:
-        if previous["cli_versions"]!=versions: parser.error("CLI versions changed during campaign")
+        if {b:version_line(v) for b,v in previous["cli_versions"].items()}!=versions: parser.error("CLI versions changed during campaign")
         current_commit=plan["git_commit"]
         plan=previous
+        plan["cli_versions"]=versions
         plan["adapter_commits"]=list(dict.fromkeys(plan.get("adapter_commits",[plan["git_commit"]])+[current_commit]))
         rows=json.loads((output/"results.json").read_text())
         (output/f"results.before-resume-{datetime.now(timezone.utc).strftime('%H%M%S')}.json").write_text(json.dumps(rows,indent=2))

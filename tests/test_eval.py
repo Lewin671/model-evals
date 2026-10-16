@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from evalkit.grading import execute, grade
-from evalkit.run import command, environment, invoke, parse_result
+from evalkit.run import command, environment, invoke, parse_result, version_line
 from evalkit.tasks import LEDGER_REF, PAGE_REF, merge, oracle, ref, suite
 from evalkit.report import render, prepare, scorecard
 from evalkit.adapters import Variant, codex_command, parse_codex
@@ -204,6 +204,38 @@ print(json.dumps({'type':'result','subtype':'success','finalText':sys.stdin.read
         proc=subprocess.run([os.sys.executable,"-m","evalkit.run","--campaign","configs/screening.json"],capture_output=True,text=True)
         self.assertNotEqual(proc.returncode,0)
         self.assertIn("call count exceeds",proc.stderr)
+
+    def test_version_update_notice_does_not_change_identity(self):
+        self.assertEqual(version_line("Updated 1.82.3 → 1.82.5\n1.82.5\n"),"1.82.5")
+
+    def test_resume_never_repeats_a_recorded_model_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p=Path(directory)
+            answers={t.prompt:json.dumps(t.expected) for t in suite(1)[3:5]}
+            (p/"answers.json").write_text(json.dumps(answers))
+            fake=p/"codex"
+            fake.write_text('''#!/usr/bin/env python3
+import json,os,pathlib,sys
+if '--version' in sys.argv:
+    print('codex-cli fake-1');sys.exit()
+p=pathlib.Path(os.environ['FAKE_ROOT'])
+with (p/'calls').open('a') as f: f.write('call\\n')
+answer=json.loads((p/'answers.json').read_text())[sys.stdin.read()]
+print(json.dumps({'type':'item.completed','item':{'id':'w','type':'error','message':'warning'}}))
+print(json.dumps({'type':'item.completed','item':{'id':'a','type':'agent_message','text':answer}}))
+print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tokens':2}}))
+''')
+            fake.chmod(0o700)
+            env=dict(os.environ,PATH=str(p)+os.pathsep+os.environ['PATH'],FAKE_ROOT=str(p))
+            base=[os.sys.executable,'-m','evalkit.run','--harness','codex','--models','fake-model',
+                  '--tasks','security-triage','evidence-reconciliation','--seed','1','--execute']
+            output=p/'run'
+            first=subprocess.run(base+['--output',str(output)],capture_output=True,text=True,env=env)
+            self.assertEqual(first.returncode,0,first.stderr)
+            second=subprocess.run(base+['--resume-run',str(output)],capture_output=True,text=True,env=env)
+            self.assertEqual(second.returncode,0,second.stderr)
+            self.assertEqual((p/'calls').read_text().splitlines(),['call','call'])
+            self.assertTrue(all(r['score']==1 for r in json.loads((output/'results.json').read_text())))
 
 
 if __name__=="__main__": unittest.main()
