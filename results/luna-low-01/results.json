@@ -1,0 +1,648 @@
+[
+  {
+    "task": "coding-A",
+    "domain": "coding",
+    "case": "A",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11570,
+          "outputTokens": 138,
+          "cacheReadTokens": 7680,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances, seen = {}, set()\\n    accepted = 0\\n    for batch in batches:\\n        key = batch['delivery']\\n        if key in seen:\\n            continue\\n        try:\\n            amounts = [int(value) for value in batch['amounts']]\\n        except ValueError:\\n            continue\\n        seen.add(key)\\n        account = batch['account']\\n        balances[account] = balances.get(account, 0) + sum(amounts)\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 6,
+      "total": 6,
+      "complete": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "task": "everyday-A",
+    "domain": "everyday",
+    "case": "A",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11617,
+          "outputTokens": 27,
+          "cacheReadTokens": 0,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F3\",\"meeting\":\"10:30\",\"cancel_now\":true,\"incremental_cost\":103}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 4,
+      "complete": false,
+      "checks": {
+        "flight": true,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": false
+      }
+    }
+  },
+  {
+    "task": "browser-A",
+    "domain": "browser",
+    "case": "A",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11478,
+          "outputTokens": 18,
+          "cacheReadTokens": 0,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\",\"C\"]}",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            },
+            "C": {
+              "annual_base": 70,
+              "max_seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 108,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "C": {
+              "all_in_annual": 70,
+              "seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11741,
+          "outputTokens": 18,
+          "cacheReadTokens": 7680,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"B\",\"annual_total\":104}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "desktop-A",
+    "domain": "desktop",
+    "case": "A",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11497,
+          "outputTokens": 24,
+          "cacheReadTokens": 7680,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r1.xlsx\",\"r2.xlsx\",\"r3.xlsx\"]}",
+        "observation": {
+          "workbooks": {
+            "r1.xlsx": {
+              "visible_filter": "approved",
+              "rows": [
+                [
+                  "Ada",
+                  "approved",
+                  "1.00",
+                  true
+                ]
+              ]
+            },
+            "r2.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "approved",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "voided",
+                  "50.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            },
+            "r3.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "voided",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "approved",
+                  "-2.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            }
+          },
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 23695,
+          "outputTokens": 75,
+          "cacheReadTokens": 11648,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r2.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"ada\",1130],[\"bo\",705]]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 4,
+      "complete": false,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": false
+      }
+    }
+  },
+  {
+    "task": "coding-B",
+    "domain": "coding",
+    "case": "B",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11566,
+          "outputTokens": 148,
+          "cacheReadTokens": 9728,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances, seen = {}, set()\\n    accepted = 0\\n    for b in batches:\\n        key = (b['account'], b['delivery'])\\n        if key in seen:\\n            continue\\n        try:\\n            amounts = [int(amount) for amount in b['amounts']]\\n        except (ValueError, TypeError):\\n            continue\\n        seen.add(key)\\n        account = b['account']\\n        balances[account] = balances.get(account, 0) + sum(amounts)\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 6,
+      "total": 6,
+      "complete": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "task": "everyday-B",
+    "domain": "everyday",
+    "case": "B",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11618,
+          "outputTokens": 27,
+          "cacheReadTokens": 9728,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F3\",\"meeting\":\"11:00\",\"cancel_now\":true,\"incremental_cost\":188}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 2,
+      "total": 4,
+      "complete": false,
+      "checks": {
+        "flight": false,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": false
+      }
+    }
+  },
+  {
+    "task": "browser-B",
+    "domain": "browser",
+    "case": "B",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11476,
+          "outputTokens": 15,
+          "cacheReadTokens": 0,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\"]}\n",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 92,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11687,
+          "outputTokens": 18,
+          "cacheReadTokens": 9728,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"A\",\"annual_total\":92}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "desktop-B",
+    "domain": "desktop",
+    "case": "B",
+    "model": "gpt-6-luna",
+    "effort": "low",
+    "harness": "Codex",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 23076,
+          "outputTokens": 86,
+          "cacheReadTokens": 20992,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r1.xlsx\",\"r2.xlsx\",\"r3.xlsx\"]}",
+        "observation": {
+          "workbooks": {
+            "r1.xlsx": {
+              "visible_filter": "approved",
+              "rows": [
+                [
+                  "Ada",
+                  "approved",
+                  "1.00",
+                  true
+                ]
+              ]
+            },
+            "r2.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "approved",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "voided",
+                  "50.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            },
+            "r3.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "voided",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "approved",
+                  "-2.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            }
+          },
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 0,
+          "inputTokens": 11814,
+          "outputTokens": 36,
+          "cacheReadTokens": 0,
+          "reasoningTokens": 0
+        },
+        "models_observed": [],
+        "efforts_observed": [],
+        "identity_source": "invocation (not exposed in Codex JSONL)",
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r3.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"ada\",1010],[\"bo\",505]]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": true
+      }
+    }
+  }
+]

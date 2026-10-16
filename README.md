@@ -8,7 +8,7 @@
 [![Status](https://img.shields.io/badge/status-recalibrating-b7791f?style=flat)](docs/challenge-design.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
 
-[Latest comparison](results/effort-comparison-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
+[Latest comparison](results/three-model-comparison-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
 
 </div>
 
@@ -18,42 +18,42 @@ usage must accompany every measured result.
 
 ## Current status
 
-**At high effort, DeepSeek completed 8/8 tasks; GLM completed 6/8.**
-This is one small diagnostic run, not a validated general ranking. Both effort and model
-identity were verified from CLI events. The high run repeats exactly the low-run tasks,
-checker, CLI version and resource limits.
+**Luna high and DeepSeek high both complete 8/8 tasks; GLM high completes 6/8.**
+This is one small paired diagnostic, not a validated general ranking. The same eight
+frozen cases are repeated at low and high reasoning effort; each case has one sample.
 
-| Model · Command Code | Effort | Coding A / B | Everyday A / B | Browser simulation A / B | Desktop simulation A / B |
-|:--|:--|:--|:--|:--|:--|
-| DeepSeek v4.1 Flash | low | ✓ / ✓ | ✓ / ✗ | ✓ / — | ✗ / △ |
-| DeepSeek v4.1 Flash | high | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
-| GLM 5.3 Flash | low | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
-| GLM 5.3 Flash | high | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | △ / ✓ |
+| Model | Harness | Low effort | High effort | Identity / effort evidence |
+|:--|:--|:--|:--|:--|
+| DeepSeek v4.1 Flash | Command Code | 4/7 graded; 1 excluded | **8/8** | CLI request events |
+| GLM 5.3 Flash | Command Code | **7/8** | 6/8 | CLI request events |
+| GPT-6 Luna | Codex | 5/8 | **8/8** | Explicit invocation; not independently exposed in JSONL |
 
-✓ complete · ✗ content/code defect · △ interface/artifact failure · — protocol failure, excluded.
-DeepSeek corrected its observed low-run errors. GLM's high coding-B solution introduced
-an undefined variable; its high desktop-A action invented file-locator suffixes and
-exported an empty table. These are different failure kinds. One sample cannot separate
-an effort effect from sampling variation.
+These are strict artifact counts. DeepSeek low has one output-header failure despite
+correct numeric data; GLM high has one invalid workbook-locator failure and one code
+runtime defect. Luna low makes two itinerary/cost errors and one cents-total error;
+its high sample corrects all three. One run cannot separate effort effects from sampling.
 
-| Run | Model requests | Reported output tokens | Reported input tokens |
-|:--|--:|--:|--:|
-| low | 23 | 6,050 | 355,773 |
-| high | 24 | 13,194 | 369,660 |
+| Configuration | Reported output tokens |
+|:--|--:|
+| DeepSeek high | 10,892 |
+| GLM high | 2,302 |
+| Luna high | 1,643 |
+| Luna low | 630 |
 
-High reported about 2.18× the total output, with most output from DeepSeek. These are
-usage fields, not verified charges; native CLI input overhead is substantial. The low
-run has one excluded case, so this is not an exact cost-efficiency ratio.
+Usage is CLI-reported, not verified charges. Harness contexts and token accounting differ;
+equal effort names do not establish equal compute. Luna used twelve Codex exec invocations
+per effort; underlying model requests/retries are not exposed. Both CLIs have native tools
+restricted, but retain different system context and tool presentation.
 
-[Low versus high comparison](results/effort-comparison-01/report.md) ·
-[High-run evidence and findings](results/paired-short-high-01/report.md) ·
-[Low-run evidence](results/paired-short-01/report.md) ·
+[Full six-configuration matrix and usage](results/three-model-comparison-01/report.md) ·
+[Luna high evidence](results/luna-high-01/report.md) ·
+[Luna low evidence](results/luna-low-01/report.md) ·
+[Flash low/high comparison](results/effort-comparison-01/report.md) ·
 [Frozen task design](docs/paired-short-screen.md)
 
 Browser/desktop results are small text-state simulations, not real application testing.
-Codex has not run on these replacement tasks. Larger workflows remain specifications.
-The earlier importer task passed 11/11 for one DeepSeek episode but stopped before a
-paired GLM run; the original prototypes remain archived below.
+GPT-6.1 Sol has not run on these replacement tasks. Larger workflows remain specifications.
+The earlier importer pilot and original prototypes remain archived below.
 
 ## Separate importer pilot (incomplete)
 

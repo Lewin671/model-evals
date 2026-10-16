@@ -1,0 +1,34 @@
+{
+  "suite": "paired-short-v1",
+  "models": [
+    "gpt-6-luna"
+  ],
+  "harness": "Codex",
+  "effort": "low",
+  "episodes": 8,
+  "max_model_requests": null,
+  "max_cli_invocations": 12,
+  "output_token_soft_guard": 16000,
+  "per_request_timeout_seconds": 120,
+  "max_turns_per_request": 1,
+  "fingerprint": "0023a6ba61d63b10c13d2a53fd23101227d771bac7db94775c5594b2fc9912f9",
+  "qualification": {
+    "reference": "pass",
+    "starter": "fails",
+    "counterfactual_transplants": "fail",
+    "travel_enumeration": "pass"
+  },
+  "zdr_enforced": false,
+  "identity_source": "invocation only; Codex JSONL does not expose model/effort",
+  "request_count_source": "CLI invocations; underlying requests/retries not exposed",
+  "created_utc": "2026-10-16T08:50:39.651405+00:00",
+  "domain_weights": {
+    "coding": 0.25,
+    "everyday": 0.25,
+    "browser": 0.25,
+    "desktop": 0.25
+  },
+  "scope": "Diagnostic only; structured-state simulation, no real browser/desktop or overall ranking",
+  "commit": "9a975a29b68d3fce90e145bc8f9e232842a16894",
+  "cli_version": "codex-cli 0.162.1"
+}

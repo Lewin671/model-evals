@@ -1,0 +1,8 @@
+{
+  "cliInvocations": 12,
+  "observedModelRequests": 0,
+  "inputTokens": 162835,
+  "outputTokens": 630,
+  "cacheReadTokens": 84864,
+  "reasoningTokens": 0
+}
