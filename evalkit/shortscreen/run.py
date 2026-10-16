@@ -18,6 +18,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--execute',action='store_true')
+    p.add_argument('--resume-unattempted',action='store_true',help='explicit continuation; never retry any recorded episode')
     args=p.parse_args()
     tasks=suite();qualification=qualify()
     fingerprint=hashlib.sha256((Path(__file__).read_bytes()+Path(__file__).with_name('tasks.py').read_bytes())).hexdigest()
@@ -29,12 +30,23 @@ def main():
         'scope':'Diagnostic only; structured-state simulation, no real browser/desktop or overall ranking'}
     print(json.dumps(plan,indent=2),flush=True)
     if not args.execute:return
-    args.output.mkdir(parents=True,exist_ok=False)
+    previous=None
+    if args.resume_unattempted:
+        previous=json.loads((args.output/'manifest.json').read_text())
+        frozen=subprocess.check_output(['git','show',previous['commit']+':evalkit/shortscreen/tasks.py'])
+        if frozen!=Path(__file__).with_name('tasks.py').read_bytes():raise RuntimeError('task/checker changed; refusing continuation')
+        (args.output/'results.before-continuation.json').write_text((args.output/'results.json').read_text())
+        (args.output/'continuation.json').write_text(json.dumps({'policy':'Skip every recorded episode including failures; invoke only unattempted slots','adapter_fingerprint':fingerprint},indent=2))
+    else:args.output.mkdir(parents=True,exist_ok=False)
     plan['commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
     plan['cli_version']=version_line(subprocess.check_output(['cmd','--no-auto-update','--version'],text=True,env=environment()))
-    (args.output/'manifest.json').write_text(json.dumps(plan,indent=2))
+    if not previous:(args.output/'manifest.json').write_text(json.dumps(plan,indent=2))
     usage={'cliInvocations':0,'observedModelRequests':0,'inputTokens':0,'outputTokens':0,'cacheReadTokens':0}
     rows=[]
+    if previous:
+        rows=json.loads((args.output/'results.json').read_text())
+        usage=json.loads((args.output/'usage.json').read_text())
+    recorded={(r['task'],r['model']) for r in rows}
     def checkpoint():
         (args.output/'results.json').write_text(json.dumps(rows,indent=2))
         (args.output/'usage.json').write_text(json.dumps(usage,indent=2))
@@ -42,6 +54,7 @@ def main():
     for index,t in enumerate(tasks):
         order=MODELS if index%2==0 else MODELS[::-1]
         for model in order:
+            if (t['id'],model) in recorded:continue
             if usage['observedModelRequests']+t['calls']>24 or usage['outputTokens']>=16000:
                 print('Stopped at predeclared budget guard',flush=True);return
             name=t['id']+'-'+model.split('/')[-1]

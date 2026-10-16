@@ -49,3 +49,14 @@ python3 -m evalkit.shortscreen.run --output .runs/paired-short-v1
 # Consumes quota; inspect the printed plan first.
 python3 -m evalkit.shortscreen.run --output .runs/paired-short-v1 --execute
 ```
+
+## Explicit continuation after a response-contract failure
+
+The first run halted when DeepSeek/browser-B attempted the denied native shell tool
+instead of returning a simulator action. Its one request remains excluded from semantic
+grades. A separately frozen adapter continuation can run **only never-attempted episodes**
+with `--resume-unattempted`. It preserves the original manifest and all recorded outcomes,
+including that failure; it refuses task/checker changes against the original commit.
+There is no retry of the failed episode, substituted answer, or change to the grader.
+The same cumulative request/output limits apply. The full four-domain comparison remains
+incomplete even after the remaining independent samples finish.
