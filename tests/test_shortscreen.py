@@ -61,3 +61,14 @@ class ShortScreen(unittest.TestCase):
             rows=json.loads((root/'results.json').read_text())
             self.assertTrue(all(r['grade']['complete'] and r['effort']=='high' for r in rows))
             self.assertEqual(json.loads((root/'manifest.json').read_text())['effort'],'high')
+
+    def test_continuation_rejects_changed_effort_before_any_request(self):
+        import contextlib,io,json,tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from evalkit.shortscreen import run
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d)/'manifest.json').write_text(json.dumps({'commit':'frozen','effort':'low'}))
+            with patch('sys.argv',['run','--output',d,'--effort','high','--execute','--resume-unattempted']),patch.object(run,'qualify',return_value={}),patch.object(run,'invoke') as invoke,contextlib.redirect_stdout(io.StringIO()),self.assertRaisesRegex(RuntimeError,'effort changed'):
+                run.main()
+            invoke.assert_not_called()

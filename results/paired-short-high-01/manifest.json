@@ -1,0 +1,32 @@
+{
+  "suite": "paired-short-v1",
+  "models": [
+    "deepseek/deepseek-v4.1-flash",
+    "z-ai/glm-5.3-flash"
+  ],
+  "harness": "Command Code",
+  "effort": "high",
+  "episodes": 16,
+  "max_model_requests": 24,
+  "output_token_soft_guard": 16000,
+  "per_request_timeout_seconds": 120,
+  "max_turns_per_request": 1,
+  "fingerprint": "26899569c719fbb0d8c8c3511982fa2d9e63ac3600c024a189094cf55134914b",
+  "qualification": {
+    "reference": "pass",
+    "starter": "fails",
+    "counterfactual_transplants": "fail",
+    "travel_enumeration": "pass"
+  },
+  "zdr_enforced": false,
+  "created_utc": "2026-10-16T08:40:46.327241+00:00",
+  "domain_weights": {
+    "coding": 0.25,
+    "everyday": 0.25,
+    "browser": 0.25,
+    "desktop": 0.25
+  },
+  "scope": "Diagnostic only; structured-state simulation, no real browser/desktop or overall ranking",
+  "commit": "bd816f5d9b1f3a559c2a66783cb5bf0c7264d4bc",
+  "cli_version": "1.82.5"
+}

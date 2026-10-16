@@ -8,7 +8,7 @@
 [![Status](https://img.shields.io/badge/status-recalibrating-b7791f?style=flat)](docs/challenge-design.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat)](LICENSE)
 
-[Latest diagnostic](results/paired-short-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
+[Latest comparison](results/effort-comparison-01/report.md) · [Challenge design](docs/challenge-design.md) · [Prototype records](#prototype-records) · [Local checks](#local-checks)
 
 </div>
 
@@ -18,30 +18,44 @@ usage must accompany every measured result.
 
 ## Current status
 
-**The short paired screen now exposes specific differences, but there is no validated general ranking.**
-Both models ran at **low reasoning effort**, verified from CLI events. The screen used
-23 requests and 6,050 reported output tokens. Its 355,773 reported input tokens include
-substantial CLI context overhead; a short response does not mean a tiny input bill.
+**At high effort, DeepSeek completed 8/8 tasks; GLM completed 6/8.**
+This is one small diagnostic run, not a validated general ranking. Both effort and model
+identity were verified from CLI events. The high run repeats exactly the low-run tasks,
+checker, CLI version and resource limits.
 
-| Model · Command Code · low effort | Coding A / B | Everyday A / B | Browser simulation A / B | Desktop simulation A / B |
-|:--|:--|:--|:--|:--|
-| DeepSeek v4.1 Flash | ✓ / ✓ | ✓ / ✗ | ✓ / — | ✗ / △ |
-| GLM 5.3 Flash | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
+| Model · Command Code | Effort | Coding A / B | Everyday A / B | Browser simulation A / B | Desktop simulation A / B |
+|:--|:--|:--|:--|:--|:--|
+| DeepSeek v4.1 Flash | low | ✓ / ✓ | ✓ / ✗ | ✓ / — | ✗ / △ |
+| DeepSeek v4.1 Flash | high | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
+| GLM 5.3 Flash | low | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | ✓ / ✓ |
+| GLM 5.3 Flash | high | ✓ / ✗ | ✓ / ✓ | ✓ / ✓ | △ / ✓ |
 
-✓ complete · ✗ content defect · △ correct numeric data, invalid export header · — protocol failure, excluded.
-The missing case prevents a balanced four-domain aggregate. One run per case is not a
-reliability estimate. Codex has not run on these replacement tasks.
+✓ complete · ✗ content/code defect · △ interface/artifact failure · — protocol failure, excluded.
+DeepSeek corrected its observed low-run errors. GLM's high coding-B solution introduced
+an undefined variable; its high desktop-A action invented file-locator suffixes and
+exported an empty table. These are different failure kinds. One sample cannot separate
+an effort effect from sampling variation.
 
-[Measured results and all prompts/responses](results/paired-short-01/report.md) ·
-[What actually failed](results/paired-short-01/failure-analysis.md) ·
-[Frozen short-screen design](docs/paired-short-screen.md)
+| Run | Model requests | Reported output tokens | Reported input tokens |
+|:--|--:|--:|--:|
+| low | 23 | 6,050 | 355,773 |
+| high | 24 | 13,194 | 369,660 |
 
-The earlier importer task passed 11/11 for one DeepSeek episode, but stopped before a
-paired GLM run. The original prototypes were too easy and remain archived below.
-The larger everyday/browser/desktop workflows are still specifications; this short screen
-uses small text-state simulations and does not replace real application testing.
+High reported about 2.18× the total output, with most output from DeepSeek. These are
+usage fields, not verified charges; native CLI input overhead is substantial. The low
+run has one excluded case, so this is not an exact cost-efficiency ratio.
 
-## Replacement workflow evidence
+[Low versus high comparison](results/effort-comparison-01/report.md) ·
+[High-run evidence and findings](results/paired-short-high-01/report.md) ·
+[Low-run evidence](results/paired-short-01/report.md) ·
+[Frozen task design](docs/paired-short-screen.md)
+
+Browser/desktop results are small text-state simulations, not real application testing.
+Codex has not run on these replacement tasks. Larger workflows remain specifications.
+The earlier importer task passed 11/11 for one DeepSeek episode but stopped before a
+paired GLM run; the original prototypes remain archived below.
+
+## Separate importer pilot (incomplete)
 
 | Model | Harness | Reasoning effort | Importer result | Coverage |
 |:--|:--|:--|:--|:--|

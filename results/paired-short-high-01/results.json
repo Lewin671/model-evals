@@ -1,0 +1,1188 @@
+[
+  {
+    "task": "coding-A",
+    "domain": "coding",
+    "case": "A",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13771,
+          "outputTokens": 1105,
+          "cacheReadTokens": 12160
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances = {}\\n    seen = set()\\n    accepted = 0\\n    for b in batches:\\n        key = b['delivery']\\n        if key in seen:\\n            continue\\n        try:\\n            amounts = [int(a) for a in b['amounts']]\\n        except ValueError:\\n            continue\\n        seen.add(key)\\n        acct = b['account']\\n        if acct not in balances:\\n            balances[acct] = 0\\n        for amt in amounts:\\n            balances[acct] += amt\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 6,
+      "total": 6,
+      "complete": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "task": "coding-A",
+    "domain": "coding",
+    "case": "A",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16977,
+          "outputTokens": 308,
+          "cacheReadTokens": 0
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances, seen = {}, set()\\n    accepted = 0\\n    for b in batches:\\n        key = b['delivery']\\n        if key in seen:\\n            continue\\n        delta = {}\\n        try:\\n            for amount in b['amounts']:\\n                a = b['account']\\n                delta[a] = delta.get(a, 0) + int(amount)\\n        except ValueError:\\n            continue\\n        seen.add(key)\\n        for a, v in delta.items():\\n            balances[a] = balances.get(a, 0) + v\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 6,
+      "total": 6,
+      "complete": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "task": "everyday-A",
+    "domain": "everyday",
+    "case": "A",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17032,
+          "outputTokens": 199,
+          "cacheReadTokens": 0
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F3\",\"meeting\":\"10:30\",\"cancel_now\":true,\"incremental_cost\":163}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "flight": true,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": true
+      }
+    }
+  },
+  {
+    "task": "everyday-A",
+    "domain": "everyday",
+    "case": "A",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13815,
+          "outputTokens": 446,
+          "cacheReadTokens": 2560
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F3\",\"meeting\":\"10:30\",\"cancel_now\":true,\"incremental_cost\":163}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "flight": true,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": true
+      }
+    }
+  },
+  {
+    "task": "browser-A",
+    "domain": "browser",
+    "case": "A",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13650,
+          "outputTokens": 96,
+          "cacheReadTokens": 4096
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\",\"C\"]}",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            },
+            "C": {
+              "annual_base": 70,
+              "max_seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 108,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "C": {
+              "all_in_annual": 70,
+              "seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13972,
+          "outputTokens": 51,
+          "cacheReadTokens": 12160
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"B\",\"annual_total\":104}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "browser-A",
+    "domain": "browser",
+    "case": "A",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16893,
+          "outputTokens": 71,
+          "cacheReadTokens": 0
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\",\"C\"]}",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            },
+            "C": {
+              "annual_base": 70,
+              "max_seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 108,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "C": {
+              "all_in_annual": 70,
+              "seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17159,
+          "outputTokens": 43,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"B\",\"annual_total\":104}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "desktop-A",
+    "domain": "desktop",
+    "case": "A",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16910,
+          "outputTokens": 71,
+          "cacheReadTokens": 0
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r1.xlsx#revision1\",\"r2.xlsx#revision2\"]}",
+        "observation": {
+          "workbooks": {},
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17037,
+          "outputTokens": 88,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r2.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 4,
+      "complete": false,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": false
+      }
+    }
+  },
+  {
+    "task": "desktop-A",
+    "domain": "desktop",
+    "case": "A",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13697,
+          "outputTokens": 92,
+          "cacheReadTokens": 12160
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r2.xlsx\"]}",
+        "observation": {
+          "workbooks": {
+            "r2.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "approved",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "voided",
+                  "50.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            }
+          },
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13875,
+          "outputTokens": 343,
+          "cacheReadTokens": 5248
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r2.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"ada\",1030],[\"bo\",705]]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": true
+      }
+    }
+  },
+  {
+    "task": "coding-B",
+    "domain": "coding",
+    "case": "B",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13765,
+          "outputTokens": 1048,
+          "cacheReadTokens": 5888
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances, seen = {}, set()\\n    accepted = 0\\n    for b in batches:\\n        account, key = b['account'], b['delivery']\\n        if (account, key) in seen:\\n            continue\\n        try:\\n            amounts = [int(a) for a in b['amounts']]\\n        except (ValueError, TypeError):\\n            continue\\n        seen.add((account, key))\\n        balances.setdefault(account, 0)\\n        for a in amounts:\\n            balances[account] += a\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 6,
+      "total": 6,
+      "complete": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  {
+    "task": "coding-B",
+    "domain": "coding",
+    "case": "B",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16979,
+          "outputTokens": 598,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"source\":\"def solve(batches):\\n    balances, seen = {}, set()\\n    accepted = 0\\n    for b in batches:\\n        root = b['delivery']\\n        account = b['account']\\n        if (root, account) in seen:\\n            continue\\n        parsed = []\\n        try:\\n            for a in b['amounts']:\\n                if not isinstance(a, str) or not a.lstrip('+-').isdigit():\\n                    raise ValueError\\n                parsed.append(int(a))\\n        except ValueError:\\n            continue\\n        seen.add((root, account))\\n        if root not in accepted_dims:\\n            pass\\n        balances[account] = balances.get(account, 0) + sum(parsed)\\n        accepted += 1\\n    return {'balances': balances, 'accepted': accepted}\"}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 1,
+      "total": 6,
+      "complete": false,
+      "checks": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  {
+    "task": "everyday-B",
+    "domain": "everyday",
+    "case": "B",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17032,
+          "outputTokens": 483,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F2\",\"meeting\":\"11:00\",\"cancel_now\":true,\"incremental_cost\":110}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "flight": true,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": true
+      }
+    }
+  },
+  {
+    "task": "everyday-B",
+    "domain": "everyday",
+    "case": "B",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13787,
+          "outputTokens": 430,
+          "cacheReadTokens": 4096
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"flight\":\"F2\",\"meeting\":\"11:00\",\"cancel_now\":true,\"incremental_cost\":110}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "flight": true,
+        "meeting": true,
+        "cancel_now": true,
+        "incremental_cost": true
+      }
+    }
+  },
+  {
+    "task": "browser-B",
+    "domain": "browser",
+    "case": "B",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13646,
+          "outputTokens": 161,
+          "cacheReadTokens": 5248
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\",\"C\"]}",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            },
+            "C": {
+              "annual_base": 70,
+              "max_seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 92,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "C": {
+              "all_in_annual": 70,
+              "seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13938,
+          "outputTokens": 125,
+          "cacheReadTokens": 5248
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"A\",\"annual_total\":92}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "browser-B",
+    "domain": "browser",
+    "case": "B",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16893,
+          "outputTokens": 37,
+          "cacheReadTokens": 0
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"inspect\",\"pages\":[\"A\",\"B\",\"C\"]}",
+        "observation": {
+          "detail_pages": {
+            "A": {
+              "annual_base": 84,
+              "included_seats": 3,
+              "extra_seat_annual": 8,
+              "audit_export": "included"
+            },
+            "B": {
+              "annual_base": 96,
+              "included_seats": 6,
+              "extra_seat_annual": 0,
+              "audit_export": "included"
+            },
+            "C": {
+              "annual_base": 70,
+              "max_seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "checkout_update": {
+            "A": {
+              "all_in_annual": 92,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "B": {
+              "all_in_annual": 104,
+              "seats": 6,
+              "audit_export": "included"
+            },
+            "C": {
+              "all_in_annual": 70,
+              "seats": 5,
+              "audit_export": "included"
+            }
+          },
+          "notice": "Final checkout quotes supersede earlier prices and include all required seats/features/taxes. Save the cheapest eligible plan. Return {\"action\":\"save\",\"plan\":\"ID\",\"annual_total\":integer}."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17154,
+          "outputTokens": 139,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"save\",\"plan\":\"A\",\"annual_total\":92}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 3,
+      "total": 3,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "plan": true,
+        "annual_total": true
+      }
+    }
+  },
+  {
+    "task": "desktop-B",
+    "domain": "desktop",
+    "case": "B",
+    "model": "z-ai/glm-5.3-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 16910,
+          "outputTokens": 61,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r1.xlsx\",\"r2.xlsx\",\"r3.xlsx\"]}",
+        "observation": {
+          "workbooks": {
+            "r1.xlsx": {
+              "visible_filter": "approved",
+              "rows": [
+                [
+                  "Ada",
+                  "approved",
+                  "1.00",
+                  true
+                ]
+              ]
+            },
+            "r2.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "approved",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "voided",
+                  "50.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            },
+            "r3.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "voided",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "approved",
+                  "-2.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            }
+          },
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 17229,
+          "outputTokens": 204,
+          "cacheReadTokens": 16320
+        },
+        "models_observed": [
+          "z-ai/glm-5.3-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r3.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"ada\",1010],[\"bo\",505]]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": true
+      }
+    }
+  },
+  {
+    "task": "desktop-B",
+    "domain": "desktop",
+    "case": "B",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "effort": "high",
+    "harness": "Command Code",
+    "steps": [
+      {
+        "request": 1,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13665,
+          "outputTokens": 95,
+          "cacheReadTokens": 5248
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"open\",\"files\":[\"r3.xlsx\"]}",
+        "observation": {
+          "workbooks": {
+            "r3.xlsx": {
+              "visible_filter": "employee=ada",
+              "rows": [
+                [
+                  " Ada ",
+                  "approved",
+                  "10.10",
+                  true
+                ],
+                [
+                  "ada",
+                  "voided",
+                  "0.20",
+                  true
+                ],
+                [
+                  "BO",
+                  "approved",
+                  "7.05",
+                  false
+                ],
+                [
+                  "bo",
+                  "approved",
+                  "-2.00",
+                  false
+                ],
+                [
+                  "cy",
+                  "pending",
+                  "3.00",
+                  false
+                ]
+              ]
+            }
+          },
+          "row_columns": [
+            "employee",
+            "status",
+            "amount_usd",
+            "visible"
+          ],
+          "notice": "Return {\"action\":\"export\",\"source\":\"filename\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"employee\",integer_cents],...]}. Rows sorted by employee. This action creates a separate CSV artifact; source workbooks are read-only."
+        }
+      },
+      {
+        "request": 2,
+        "exit_code": 0,
+        "usage": {
+          "cliInvocations": 1,
+          "observedModelRequests": 1,
+          "inputTokens": 13874,
+          "outputTokens": 6900,
+          "cacheReadTokens": 5248
+        },
+        "models_observed": [
+          "deepseek/deepseek-v4.1-flash"
+        ],
+        "efforts_observed": [
+          "high"
+        ],
+        "tool_calls": 0,
+        "subtype": "success",
+        "answer": "{\"action\":\"export\",\"source\":\"r3.xlsx\",\"destination\":\"reimbursements.csv\",\"rows\":[[\"ada\",1010],[\"bo\",505]]}"
+      }
+    ],
+    "status": "graded",
+    "grade": {
+      "passed": 4,
+      "total": 4,
+      "complete": true,
+      "checks": {
+        "action": true,
+        "source": true,
+        "destination": true,
+        "rows": true
+      }
+    }
+  }
+]
